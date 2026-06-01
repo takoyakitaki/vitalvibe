@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VitalVibe – โปรไฟล์</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { font-family:'Prompt',sans-serif; -webkit-tap-highlight-color:transparent; }
+    body { background:#fdf4ff; }
+    .pb-safe { padding-bottom:env(safe-area-inset-bottom,20px); }
+    .hide-scrollbar::-webkit-scrollbar{display:none} .hide-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .fade-in{animation:fadeIn .35s ease-out forwards}
+    input:focus{outline:none;border-color:#a855f7}
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden">
+<div class="h-full w-full max-w-md mx-auto bg-white shadow-2xl relative flex flex-col">
+
+  <!-- Header -->
+  <div class="flex-shrink-0 pt-12 pb-4 px-5 bg-white border-b border-gray-100">
+    <p class="text-xs text-gray-400 font-semibold uppercase tracking-widest">VitalVibe</p>
+    <h1 class="text-2xl font-black text-gray-900">👤 โปรไฟล์ & รางวัล</h1>
+  </div>
+
+  <!-- Scroll area -->
+  <div class="flex-1 overflow-y-auto hide-scrollbar pb-28 px-5 pt-5">
+
+    <!-- Profile card -->
+    <div class="bg-gradient-to-br from-violet-500 to-purple-600 rounded-3xl p-5 text-white mb-5 shadow-xl">
+      <div class="flex items-center gap-4">
+        <div id="avatarDisplay"
+             class="w-20 h-20 rounded-2xl bg-white/20 flex items-center justify-center text-4xl overflow-hidden flex-shrink-0 cursor-pointer border-2 border-white/30"
+             onclick="document.getElementById('avatarInput').click()">
+          <span id="avatarEmoji">👦🏻</span>
+        </div>
+        <input id="avatarInput" type="file" accept="image/*" class="hidden" onchange="onAvatarSelected(event)">
+        <div class="flex-1 min-w-0">
+          <p id="profileName"  class="text-xl font-black truncate">กำลังโหลด…</p>
+          <p id="profileEmail" class="text-xs opacity-75 truncate">–</p>
+          <div class="flex items-center gap-3 mt-2">
+            <div class="bg-white/20 rounded-full px-3 py-1 flex items-center gap-1">
+              <span class="text-sm">🪙</span>
+              <span id="walletPoints" class="font-black text-sm">0</span>
+              <span class="text-xs opacity-75">wallet</span>
+            </div>
+            <div class="bg-white/20 rounded-full px-3 py-1 flex items-center gap-1">
+              <span class="text-sm">⭐</span>
+              <span id="totalPoints" class="font-black text-sm">0</span>
+              <span class="text-xs opacity-75">รวม</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs opacity-60 mt-3">แตะรูปโปรไฟล์เพื่อเปลี่ยน</p>
+    </div>
+
+    <!-- Edit profile -->
+    <div class="bg-white border border-gray-100 rounded-3xl p-4 shadow-sm mb-5">
+      <h3 class="font-black text-gray-800 mb-3">✏️ แก้ไขโปรไฟล์</h3>
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs text-gray-400 font-bold uppercase">ชื่อที่แสดง</label>
+          <input id="editName" type="text" placeholder="ชื่อของคุณ"
+            class="mt-1 w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold transition-colors">
+        </div>
+        <div>
+          <label class="text-xs text-gray-400 font-bold uppercase">เป้าหมายแคลอรี่ต่อวัน</label>
+          <input id="editCalGoal" type="number" placeholder="2000"
+            class="mt-1 w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold transition-colors">
+        </div>
+      </div>
+      <button onclick="saveProfile()"
+        class="mt-4 w-full bg-gradient-to-r from-violet-400 to-purple-500 text-white font-black py-3 rounded-2xl text-sm active:scale-95 transition shadow-md">
+        💾 บันทึกโปรไฟล์
+      </button>
+    </div>
+
+    <!-- Rewards -->
+    <div class="mb-5">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-black text-gray-800">🎁 แลกของรางวัล</h3>
+        <div class="flex items-center gap-1 bg-yellow-50 border border-yellow-200 rounded-full px-3 py-1">
+          <span class="text-sm">🪙</span>
+          <span id="walletDisplay" class="font-black text-yellow-600 text-xs">0</span>
+          <span class="text-[10px] text-gray-400">แต้ม</span>
+        </div>
+      </div>
+      <div id="rewardGrid" class="grid grid-cols-2 gap-3"></div>
+    </div>
+
+    <!-- Redemption history -->
+    <div class="mb-5">
+      <h3 class="font-black text-gray-800 mb-3">🧾 ประวัติการแลก</h3>
+      <div id="redemptionHistory" class="space-y-2"></div>
+    </div>
+
+    <!-- Logout -->
+    <button onclick="logout()"
+      class="w-full border-2 border-gray-200 text-gray-500 font-black py-3 rounded-2xl text-sm active:scale-95 transition mb-4">
+      🚪 ออกจากระบบ
+    </button>
+
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur border-t border-gray-100 flex items-center justify-around pb-safe z-50 shadow-2xl">
+    <a href="food.html"     class="flex flex-col items-center py-2 px-4 gap-0.5 text-gray-400">
+      <span class="text-2xl">🍱</span><span class="text-[10px] font-bold">อาหาร</span></a>
+    <a href="health.html"   class="flex flex-col items-center py-2 px-4 gap-0.5 text-gray-400">
+      <span class="text-2xl">📋</span><span class="text-[10px] font-bold">สุขภาพ</span></a>
+    <a href="missions.html" class="flex flex-col items-center py-2 px-4 gap-0.5 text-gray-400">
+      <span class="text-2xl">🏆</span><span class="text-[10px] font-bold">ภารกิจ</span></a>
+    <a href="profile.html"  class="flex flex-col items-center py-2 px-4 gap-0.5 text-violet-500">
+      <span class="text-2xl">👤</span><span class="text-[10px] font-bold">โปรไฟล์</span></a>
+  </nav>
+
+</div>
+
+<script type="module">
+  import { requireAuth, clearSession, saveSession } from '../lib/auth.js';
+  import { db } from '../lib/firebase.js';
+  import {
+    doc, getDoc, updateDoc, setDoc,
+    collection, getDocs, addDoc, query, where, orderBy, onSnapshot, runTransaction
+  } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+  import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+  import { auth } from '../lib/firebase.js';
+
+  const session = requireAuth();
+  if (!session) await new Promise(() => {});
+  const uid = session.uid;
+
+  // ── Load user ──────────────────────────────────────────────
+  onSnapshot(doc(db,'users',uid), snap => {
+    const d = snap.data() || {};
+    document.getElementById('profileName').textContent     = d.displayName || session.displayName;
+    document.getElementById('profileEmail').textContent    = d.email || '–';
+    document.getElementById('walletPoints').textContent    = (d.wallet||0).toLocaleString();
+    document.getElementById('totalPoints').textContent     = (d.points||0).toLocaleString();
+    document.getElementById('walletDisplay').textContent   = (d.wallet||0).toLocaleString();
+    document.getElementById('editName').value              = d.displayName || '';
+    document.getElementById('editCalGoal').value           = d.calorieGoal || 2000;
+
+    // Avatar
+    const av = d.avatar || '';
+    const disp = document.getElementById('avatarDisplay');
+    if (av.startsWith('http') || av.startsWith('data:')) {
+      disp.innerHTML = `<img src="${av}" class="w-full h-full object-cover">`;
+    } else {
+      disp.innerHTML = `<span id="avatarEmoji">${av || '👦🏻'}</span>`;
+    }
+  });
+
+  // ── Avatar upload ──────────────────────────────────────────
+  window.onAvatarSelected = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    // Store as base64 (small image)
+    const reader = new FileReader();
+    reader.onload = async ev => {
+      const b64 = ev.target.result; // data:image/... base64
+      await updateDoc(doc(db,'users',uid), { avatar: b64 });
+      saveSession({ ...session, avatar: b64 });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // ── Save profile ───────────────────────────────────────────
+  window.saveProfile = async () => {
+    const name    = document.getElementById('editName').value.trim();
+    const calGoal = parseInt(document.getElementById('editCalGoal').value)||2000;
+    if (!name) return alert('กรุณาระบุชื่อ');
+    await updateDoc(doc(db,'users',uid), { displayName: name, calorieGoal: calGoal });
+    saveSession({ ...session, displayName: name });
+    alert('บันทึกสำเร็จ ✅');
+  };
+
+  // ── Rewards ────────────────────────────────────────────────
+  async function loadRewards() {
+    const snap = await getDocs(collection(db,'rewards'));
+    const rewards = snap.docs.map(d=>({id:d.id,...d.data()}));
+    if (!rewards.length) {
+      document.getElementById('rewardGrid').innerHTML =
+        `<div class="col-span-2 text-center text-gray-300 py-6 border-2 border-dashed border-gray-200 rounded-3xl font-bold">
+          ยังไม่มีของรางวัลในระบบ<br><span class="text-xs">Admin สามารถเพิ่มได้ใน Admin Panel</span>
+        </div>`;
+      return;
+    }
+    document.getElementById('rewardGrid').innerHTML = rewards.map(r => `
+      <div class="fade-in bg-white border border-gray-100 rounded-3xl p-4 shadow-sm flex flex-col items-center text-center">
+        <div class="w-full aspect-square bg-purple-50 rounded-2xl flex items-center justify-center text-5xl mb-3">${r.image||'🎁'}</div>
+        <h4 class="font-black text-gray-800 text-xs mb-1 leading-tight">${r.title}</h4>
+        <p class="text-[10px] text-gray-400 mb-3">${r.description||''}</p>
+        <button onclick="redeemReward('${r.id}','${r.title}',${r.points})"
+          class="w-full bg-gradient-to-r from-violet-400 to-purple-500 text-white font-black py-2.5 rounded-xl text-xs shadow active:scale-95 transition">
+          แลก ${(r.points||0).toLocaleString()} 🪙
+        </button>
+      </div>`).join('');
+  }
+
+  window.redeemReward = async (rewardId, title, cost) => {
+    if (!confirm(`Redeem "${title}" for ${cost} points?`)) return;
+
+    try {
+      await runTransaction(db, async (transaction) => {
+        const userRef = doc(db,'users',uid);
+        const userSnap = await transaction.get(userRef);
+        const wallet = userSnap.data()?.wallet || 0;
+        if (wallet < cost) {
+          throw new Error(`POINTS_NOT_ENOUGH:${wallet}`);
+        }
+
+        const redemptionRef = doc(collection(db,'redemptions'));
+        transaction.update(userRef, { wallet: wallet - cost });
+        transaction.set(redemptionRef, {
+          uid, rewardId, title, cost,
+          redeemedAt: new Date().toISOString(), status: 'pending'
+        });
+      });
+    } catch (e) {
+      if (e.message?.startsWith('POINTS_NOT_ENOUGH:')) {
+        const wallet = e.message.split(':')[1] || 0;
+        return alert(`Not enough points (${wallet} / ${cost})`);
+      }
+      console.error(e);
+      return alert('Redeem failed. Please try again.');
+    }
+
+    loadRedemptionHistory();
+    alert('Reward redeemed. Waiting for admin confirmation.');
+  };
+
+  // ── Redemption history ─────────────────────────────────────
+  async function loadRedemptionHistory() {
+    const q = query(
+      collection(db,'redemptions'),
+      where('uid','==',uid)
+    );
+    const snap = await getDocs(q);
+    const entries = snap.docs
+      .map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>String(b.redeemedAt || '').localeCompare(String(a.redeemedAt || '')));
+    const statusLabel = { pending:'รอยืนยัน', confirmed:'ยืนยันแล้ว', delivered:'ส่งแล้ว' };
+    const statusColor = { pending:'text-yellow-500', confirmed:'text-blue-500', delivered:'text-green-500' };
+    document.getElementById('redemptionHistory').innerHTML = entries.length
+      ? entries.map(e=>`
+        <div class="fade-in bg-white border border-gray-100 rounded-2xl p-3 flex items-center gap-3 shadow-sm">
+          <span class="text-2xl">🎁</span>
+          <div class="flex-1 min-w-0">
+            <p class="font-bold text-gray-800 text-sm truncate">${e.title}</p>
+            <p class="text-xs text-gray-400">${new Date(e.redeemedAt).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'})}</p>
+          </div>
+          <div class="text-right flex-shrink-0">
+            <p class="text-xs font-black text-red-400">-${e.cost} 🪙</p>
+            <p class="text-[10px] font-bold ${statusColor[e.status]||'text-gray-400'}">${statusLabel[e.status]||e.status}</p>
+          </div>
+        </div>`).join('')
+      : `<p class="text-center text-gray-300 py-6 font-bold text-sm">ยังไม่มีประวัติการแลก</p>`;
+  }
+
+  // ── Logout ─────────────────────────────────────────────────
+  window.logout = async () => {
+    if (!confirm('ออกจากระบบ?')) return;
+    await signOut(auth);
+    clearSession();
+    window.location.href = '/login.html';
+  };
+
+  loadRewards();
+  loadRedemptionHistory();
+</script>
+</body>
+</html>

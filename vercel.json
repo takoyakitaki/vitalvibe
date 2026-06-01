@@ -1,0 +1,19 @@
+{
+  "rewrites": [
+    { "source": "/",              "destination": "/login.html" },
+    { "source": "/food",          "destination": "/pages/food.html" },
+    { "source": "/health",        "destination": "/pages/health.html" },
+    { "source": "/missions",      "destination": "/pages/missions.html" },
+    { "source": "/profile",       "destination": "/pages/profile.html" },
+    { "source": "/admin",         "destination": "/admin/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options",        "value": "ALLOWALL" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    }
+  ]
+}

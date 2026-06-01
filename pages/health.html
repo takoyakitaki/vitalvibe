@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VitalVibe – สุขภาพ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { font-family:'Prompt',sans-serif; -webkit-tap-highlight-color:transparent; }
+    body { background:#f0f9ff; }
+    .pb-safe { padding-bottom:env(safe-area-inset-bottom,20px); }
+    .hide-scrollbar::-webkit-scrollbar{display:none} .hide-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .fade-in{animation:fadeIn .35s ease-out forwards}
+    input:focus{outline:none;border-color:#38bdf8}
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden">
+<div class="h-full w-full max-w-md mx-auto bg-white shadow-2xl relative flex flex-col">
+
+  <!-- Header -->
+  <div class="flex-shrink-0 pt-12 pb-4 px-5 bg-white border-b border-gray-100">
+    <p class="text-xs text-gray-400 font-semibold uppercase tracking-widest">VitalVibe</p>
+    <h1 class="text-2xl font-black text-gray-900">📋 บันทึกสุขภาพ</h1>
+
+    <!-- Type selector tabs -->
+    <div class="flex gap-2 mt-4 overflow-x-auto hide-scrollbar pb-1">
+      <button data-type="weight"   onclick="switchType(this)" class="type-btn active flex-shrink-0 px-4 py-2 rounded-full text-xs font-black transition">⚖️ น้ำหนัก</button>
+      <button data-type="sugar"    onclick="switchType(this)" class="type-btn flex-shrink-0 px-4 py-2 rounded-full text-xs font-black transition bg-gray-100 text-gray-500">🩸 น้ำตาล</button>
+      <button data-type="pressure" onclick="switchType(this)" class="type-btn flex-shrink-0 px-4 py-2 rounded-full text-xs font-black transition bg-gray-100 text-gray-500">💓 ความดัน</button>
+    </div>
+    <style>
+      .type-btn.active{background:linear-gradient(135deg,#38bdf8,#0ea5e9);color:#fff;}
+    </style>
+  </div>
+
+  <!-- Scroll area -->
+  <div class="flex-1 overflow-y-auto hide-scrollbar pb-28 px-5 pt-5" id="scrollArea">
+
+    <!-- Latest value card -->
+    <div id="latestCard" class="bg-gradient-to-r from-sky-500 to-blue-600 rounded-3xl p-5 text-white mb-5 shadow-lg">
+      <p class="text-xs font-bold opacity-75 uppercase tracking-wider mb-1" id="latestLabel">ล่าสุด – น้ำหนัก</p>
+      <p class="text-5xl font-black" id="latestValue">–</p>
+      <p class="text-sm opacity-75 mt-1" id="latestDate">ยังไม่มีข้อมูล</p>
+    </div>
+
+    <!-- Log form -->
+    <div id="logForm" class="bg-white border border-gray-100 rounded-3xl p-4 shadow-sm mb-5">
+      <h3 class="font-black text-gray-800 mb-3" id="formTitle">บันทึกน้ำหนัก</h3>
+      <div id="formFields" class="space-y-3"></div>
+      <button onclick="saveLog()"
+        class="mt-4 w-full bg-gradient-to-r from-sky-400 to-blue-500 text-white font-black py-3 rounded-2xl text-sm active:scale-95 transition shadow-md">
+        💾 บันทึก
+      </button>
+    </div>
+
+    <!-- History -->
+    <div>
+      <h3 class="font-black text-gray-700 mb-3">📅 ประวัติย้อนหลัง</h3>
+      <div id="historyList" class="space-y-2"></div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur border-t border-gray-100 flex items-center justify-around pb-safe z-50 shadow-2xl">
+    <a href="food.html"     class="flex flex-col items-center py-2 px-4 gap-0.5 text-gray-400">
+      <span class="text-2xl">🍱</span><span class="text-[10px] font-bold">อาหาร</span></a>
+    <a href="health.html"   class="flex flex-col items-center py-2 px-4 gap-0.5 text-sky-500">
+      <span class="text-2xl">📋</span><span class="text-[10px] font-bold">สุขภาพ</span></a>
+    <a href="missions.html" class="flex flex-col items-center py-2 px-4 gap-0.5 text-gray-400">
+      <span class="text-2xl">🏆</span><span class="text-[10px] font-bold">ภารกิจ</span></a>
+    <a href="profile.html"  class="flex flex-col items-center py-2 px-4 gap-0.5 text-gray-400">
+      <span class="text-2xl">👤</span><span class="text-[10px] font-bold">โปรไฟล์</span></a>
+  </nav>
+
+</div>
+
+<script type="module">
+  import { requireAuth } from '../lib/auth.js';
+  import { db } from '../lib/firebase.js';
+  import {
+    collection, addDoc, query, where,
+    onSnapshot, deleteDoc, doc
+  } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+  const session = requireAuth();
+  if (!session) await new Promise(() => {});
+  const uid = session.uid;
+
+  // ── Type config ────────────────────────────────────────────
+  const TYPES = {
+    weight: {
+      label: 'น้ำหนัก', unit: 'kg', icon: '⚖️',
+      gradient: 'from-sky-500 to-blue-600',
+      fields: [
+        { id:'w_weight', label:'น้ำหนัก (kg)', type:'number', placeholder:'65.5', step:'0.1' }
+      ],
+      display: e => `${e.weight} kg`,
+    },
+    sugar: {
+      label: 'น้ำตาลในเลือด', unit: 'mg/dL', icon: '🩸',
+      gradient: 'from-rose-500 to-pink-600',
+      fields: [
+        { id:'s_sugar', label:'ระดับน้ำตาล (mg/dL)', type:'number', placeholder:'100' },
+        { id:'s_context', label:'สถานะ', type:'select',
+          options:['หลังตื่นนอน','ก่อนอาหาร','หลังอาหาร 2 ชม.','ก่อนนอน'] }
+      ],
+      display: e => `${e.sugar} mg/dL – ${e.context||''}`,
+    },
+    pressure: {
+      label: 'ความดันโลหิต', unit: 'mmHg', icon: '💓',
+      gradient: 'from-violet-500 to-purple-600',
+      fields: [
+        { id:'p_sys', label:'ความดันบน (Systolic)', type:'number', placeholder:'120' },
+        { id:'p_dia', label:'ความดันล่าง (Diastolic)', type:'number', placeholder:'80' },
+        { id:'p_pulse', label:'ชีพจร (bpm)', type:'number', placeholder:'72' }
+      ],
+      display: e => `${e.sys}/${e.dia} mmHg · ${e.pulse||'–'} bpm`,
+    },
+  };
+
+  let currentType = 'weight';
+  let unsubscribe = null;
+
+  window.switchType = (btn) => {
+    document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentType = btn.dataset.type;
+    renderForm();
+    loadHistory();
+  };
+
+  function renderForm() {
+    const cfg = TYPES[currentType];
+    document.getElementById('formTitle').textContent = `บันทึก${cfg.label}`;
+    const fields = cfg.fields.map(f => {
+      if (f.type === 'select') {
+        return `<div>
+          <label class="text-xs text-gray-400 font-bold uppercase">${f.label}</label>
+          <select id="${f.id}" class="mt-1 w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-semibold focus:border-sky-400 outline-none">
+            ${f.options.map(o=>`<option>${o}</option>`).join('')}
+          </select>
+        </div>`;
+      }
+      return `<div>
+        <label class="text-xs text-gray-400 font-bold uppercase">${f.label}</label>
+        <input id="${f.id}" type="${f.type}" placeholder="${f.placeholder}" step="${f.step||1}"
+          class="mt-1 w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold transition-colors">
+      </div>`;
+    }).join('');
+    document.getElementById('formFields').innerHTML = fields;
+  }
+
+  window.saveLog = async () => {
+    const cfg  = TYPES[currentType];
+    const data = { uid, type: currentType, createdAt: new Date().toISOString() };
+    let valid = true;
+    cfg.fields.forEach(f => {
+      const el = document.getElementById(f.id);
+      const v  = f.type === 'number' ? parseFloat(el.value) : el.value;
+      if (f.type === 'number' && isNaN(v)) { valid = false; return; }
+      const key = f.id.split('_')[1];
+      data[key] = v;
+    });
+    if (!valid) return alert('กรุณากรอกข้อมูลให้ครบ');
+    try {
+      await addDoc(collection(db,'healthLogs'), data);
+      cfg.fields.forEach(f => {
+        const el = document.getElementById(f.id);
+        if (el.tagName !== 'SELECT') el.value = '';
+      });
+    } catch (err) {
+      alert('บันทึกสุขภาพไม่สำเร็จ: ' + err.message);
+    }
+  };
+
+  function loadHistory() {
+    if (unsubscribe) unsubscribe();
+    const cfg = TYPES[currentType];
+    const q   = query(
+      collection(db,'healthLogs'),
+      where('uid','==',uid),
+      where('type','==',currentType)
+    );
+    unsubscribe = onSnapshot(q, snap => {
+      const entries = snap.docs
+        .map(d=>({id:d.id,...d.data()}))
+        .sort((a,b)=>String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
+        .slice(0,30);
+      renderHistory(entries, cfg);
+      if (entries.length) {
+        document.getElementById('latestValue').textContent = cfg.display(entries[0]).split(' ')[0];
+        document.getElementById('latestLabel').textContent = `ล่าสุด – ${cfg.label}`;
+        document.getElementById('latestDate').textContent  =
+          new Date(entries[0].createdAt).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'});
+      } else {
+        document.getElementById('latestValue').textContent = '–';
+        document.getElementById('latestDate').textContent  = 'ยังไม่มีข้อมูล';
+      }
+      // Update card gradient
+      document.getElementById('latestCard').className =
+        `bg-gradient-to-r ${cfg.gradient} rounded-3xl p-5 text-white mb-5 shadow-lg`;
+    }, err => {
+      console.error('Health log listener failed:', err);
+      document.getElementById('historyList').innerHTML =
+        `<div class="text-center text-red-400 py-8 font-bold text-sm">โหลดประวัติสุขภาพไม่สำเร็จ: ${err.message}</div>`;
+    });
+  }
+
+  function renderHistory(entries, cfg) {
+    if (!entries.length) {
+      document.getElementById('historyList').innerHTML =
+        `<div class="text-center text-gray-300 py-8"><p class="text-4xl mb-2">${cfg.icon}</p><p class="font-bold text-gray-400">ยังไม่มีประวัติ</p></div>`;
+      return;
+    }
+    document.getElementById('historyList').innerHTML = entries.map(e => `
+      <div class="fade-in bg-white border border-gray-100 rounded-2xl p-3 flex items-center gap-3 shadow-sm">
+        <div class="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-lg flex-shrink-0">${cfg.icon}</div>
+        <div class="flex-1">
+          <p class="font-bold text-gray-800 text-sm">${cfg.display(e)}</p>
+          <p class="text-xs text-gray-400">${new Date(e.createdAt).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'})}</p>
+        </div>
+        <button onclick="deleteLog('${e.id}')" class="text-gray-200 hover:text-red-400 transition text-lg flex-shrink-0">🗑</button>
+      </div>`).join('');
+  }
+
+  window.deleteLog = async (id) => {
+    if (!confirm('ลบรายการนี้?')) return;
+    try {
+      await deleteDoc(doc(db,'healthLogs',id));
+    } catch (err) {
+      alert('ลบไม่สำเร็จ: ' + err.message);
+    }
+  };
+
+  // Init
+  renderForm();
+  loadHistory();
+</script>
+</body>
+</html>

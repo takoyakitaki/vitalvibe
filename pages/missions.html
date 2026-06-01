@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VitalVibe – ภารกิจ & อันดับ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { font-family:'Prompt',sans-serif; -webkit-tap-highlight-color:transparent; }
+    body { background:#fffbeb; }
+    .pb-safe { padding-bottom:env(safe-area-inset-bottom,20px); }
+    .hide-scrollbar::-webkit-scrollbar{display:none} .hide-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .fade-in{animation:fadeIn .35s ease-out forwards}
+    @keyframes pop{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+    .pop{animation:pop .3s ease-out}
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden">
+<div class="h-full w-full max-w-md mx-auto bg-white shadow-2xl relative flex flex-col">
+
+  <!-- Header -->
+  <div class="flex-shrink-0 pt-12 pb-4 px-5 bg-white border-b border-gray-100">
+    <p class="text-xs text-gray-400 font-semibold uppercase tracking-widest">VitalVibe</p>
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-black text-gray-900">🏆 ภารกิจ & อันดับ</h1>
+      <div class="flex items-center gap-1 bg-yellow-50 border border-yellow-200 rounded-full px-3 py-1">
+        <span class="text-base">🪙</span>
+        <span id="myPoints" class="font-black text-yellow-600 text-sm">0</span>
+      </div>
+    </div>
+
+    <!-- Tab: Missions / Leaderboard -->
+    <div class="flex bg-gray-100 rounded-2xl p-1 mt-4">
+      <button id="tabMissions"     onclick="switchTab('missions')"
+        class="flex-1 py-2 rounded-xl text-xs font-black transition tab-active">📋 ภารกิจ</button>
+      <button id="tabLeaderboard"  onclick="switchTab('leaderboard')"
+        class="flex-1 py-2 rounded-xl text-xs font-black transition tab-inactive">🏅 อันดับ</button>
+    </div>
+    <style>
+      .tab-active{background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;}
+      .tab-inactive{color:#9ca3af;}
+    </style>
+  </div>
+
+  <!-- Scroll area -->
+  <div class="flex-1 overflow-y-auto hide-scrollbar pb-28 px-5 pt-5">
+
+    <!-- Missions Panel -->
+    <div id="panelMissions">
+      <div id="missionList" class="space-y-3"></div>
+    </div>
+
+    <!-- Leaderboard Panel -->
+    <div id="panelLeaderboard" class="hidden">
+      <div class="bg-gradient-to-r from-amber-400 to-orange-500 rounded-3xl p-4 text-white mb-5 shadow-lg">
+        <p class="text-xs font-bold opacity-75 uppercase tracking-wider">อันดับของคุณ</p>
+        <p class="text-4xl font-black" id="myRank"># –</p>
+        <p class="text-sm opacity-75 mt-1">สัปดาห์นี้</p>
+      </div>
+      <div id="leaderboardList" class="space-y-2"></div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur border-t border-gray-100 flex items-center justify-around pb-safe z-50 shadow-2xl">
+    <a href="food.html"     class="flex flex-col items-center py-2 px-4 gap-0.5 text-gray-400">
+      <span class="text-2xl">🍱</span><span class="text-[10px] font-bold">อาหาร</span></a>
+    <a href="health.html"   class="flex flex-col items-center py-2 px-4 gap-0.5 text-gray-400">
+      <span class="text-2xl">📋</span><span class="text-[10px] font-bold">สุขภาพ</span></a>
+    <a href="missions.html" class="flex flex-col items-center py-2 px-4 gap-0.5 text-amber-500">
+      <span class="text-2xl">🏆</span><span class="text-[10px] font-bold">ภารกิจ</span></a>
+    <a href="profile.html"  class="flex flex-col items-center py-2 px-4 gap-0.5 text-gray-400">
+      <span class="text-2xl">👤</span><span class="text-[10px] font-bold">โปรไฟล์</span></a>
+  </nav>
+
+</div>
+
+<script type="module">
+  import { requireAuth } from '../lib/auth.js';
+  import { db } from '../lib/firebase.js';
+  import {
+    collection, doc, getDoc, getDocs, addDoc, setDoc, updateDoc,
+    query, where, orderBy, limit, onSnapshot, increment
+  } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+  const session = requireAuth();
+  if (!session) await new Promise(() => {});
+  const uid  = session.uid;
+  const week = getWeekKey();
+  let missionsById = new Map();
+
+  function getWeekKey() {
+    const d = new Date();
+    const jan1 = new Date(d.getFullYear(), 0, 1);
+    const wk   = Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+    return `${d.getFullYear()}-W${String(wk).padStart(2,'0')}`;
+  }
+
+  // ── Points realtime ────────────────────────────────────────
+  onSnapshot(doc(db,'users',uid), snap => {
+    const pts = snap.data()?.points || 0;
+    document.getElementById('myPoints').textContent = pts.toLocaleString();
+  });
+
+  // ── Tabs ───────────────────────────────────────────────────
+  window.switchTab = (tab) => {
+    document.getElementById('panelMissions').classList.toggle('hidden',    tab!=='missions');
+    document.getElementById('panelLeaderboard').classList.toggle('hidden', tab!=='leaderboard');
+    document.getElementById('tabMissions').className    = `flex-1 py-2 rounded-xl text-xs font-black transition ${tab==='missions'?'tab-active':'tab-inactive'}`;
+    document.getElementById('tabLeaderboard').className = `flex-1 py-2 rounded-xl text-xs font-black transition ${tab==='leaderboard'?'tab-active':'tab-inactive'}`;
+    if (tab === 'leaderboard') loadLeaderboard();
+  };
+
+  // ── Missions ───────────────────────────────────────────────
+  // Default missions (also stored in Firestore under /missions/)
+  const DEFAULT_MISSIONS = [
+    { id:'m_food3',   icon:'🍱', title:'บันทึกอาหาร 3 มื้อ',    desc:'บันทึกอาหารครบ 3 มื้อในวันนี้',  points:50,  target:3,  type:'food' },
+    { id:'m_water8',  icon:'💧', title:'ดื่มน้ำ 8 แก้ว',         desc:'บันทึกการดื่มน้ำ 8 ครั้ง',       points:30,  target:8,  type:'water' },
+    { id:'m_weight',  icon:'⚖️', title:'ชั่งน้ำหนักวันนี้',      desc:'บันทึกน้ำหนักอย่างน้อย 1 ครั้ง', points:20,  target:1,  type:'weight' },
+    { id:'m_log5',    icon:'📋', title:'บันทึกสุขภาพ 5 ครั้ง',   desc:'บันทึกค่าสุขภาพใดก็ได้ 5 ครั้ง', points:60,  target:5,  type:'health' },
+    { id:'m_photo',   icon:'📷', title:'ถ่ายรูปอาหาร',            desc:'ใช้ Gemini วิเคราะห์อาหาร 1 มื้อ',points:40,  target:1,  type:'photo' },
+    { id:'m_streak3', icon:'🔥', title:'บันทึก 3 วันติด',         desc:'บันทึกอาหารติดต่อกัน 3 วัน',     points:100, target:3,  type:'streak' },
+  ];
+
+  async function loadMissions() {
+    const today = new Date().toISOString().split('T')[0];
+    // Fetch missions from Firestore (admin can add more), fall back to defaults
+    const mSnap = await getDocs(collection(db,'missions'));
+    const missions = mSnap.empty
+      ? DEFAULT_MISSIONS
+      : mSnap.docs.map(d=>({id:d.id,...d.data()}));
+    missionsById = new Map(missions.map(m => [m.id, m]));
+
+    // Fetch user's completed missions today
+    const cSnap = await getDocs(query(
+      collection(db,'missionCompletions'),
+      where('uid','==',uid),
+      where('date','==',today)
+    ));
+    const completed = new Set(cSnap.docs.map(d=>d.data().missionId));
+
+    renderMissions(missions, completed);
+  }
+
+  function renderMissions(missions, completed) {
+    const html = missions.map(m => {
+      const done = completed.has(m.id);
+      return `<div class="fade-in bg-white border ${done?'border-green-200 bg-green-50':'border-gray-100'} rounded-3xl p-4 shadow-sm flex items-center gap-4">
+        <div class="w-14 h-14 rounded-2xl ${done?'bg-green-100':'bg-amber-50'} flex items-center justify-center text-3xl flex-shrink-0">${done?'✅':m.icon}</div>
+        <div class="flex-1 min-w-0">
+          <p class="font-black text-gray-800 text-sm">${m.title}</p>
+          <p class="text-xs text-gray-400 mt-0.5 leading-snug">${m.desc}</p>
+          <div class="flex items-center gap-1 mt-1">
+            <span class="text-xs font-black text-yellow-500">+${m.points} แต้ม</span>
+          </div>
+        </div>
+        ${done
+          ? `<span class="text-xs font-black text-green-500 flex-shrink-0">สำเร็จ ✓</span>`
+          : `<button onclick="completeMission('${m.id}')"
+              class="flex-shrink-0 bg-gradient-to-r from-amber-400 to-orange-500 text-white font-black text-xs px-4 py-2 rounded-2xl active:scale-95 transition shadow-md">
+              รับแต้ม
+            </button>`
+        }
+      </div>`;
+    }).join('');
+    document.getElementById('missionList').innerHTML = html || '<p class="text-center text-gray-300 py-10 font-bold">ยังไม่มีภารกิจ</p>';
+  }
+
+  window.completeMission = async (missionId) => {
+    const mission = missionsById.get(missionId);
+    if (!mission) return alert('Mission not found');
+    const points = Number(mission.points) || 0;
+    const today = new Date().toISOString().split('T')[0];
+    // Check not already done
+    const cSnap = await getDocs(query(
+      collection(db,'missionCompletions'),
+      where('uid','==',uid),
+      where('missionId','==',missionId),
+      where('date','==',today)
+    ));
+    if (!cSnap.empty) return alert('ทำภารกิจนี้ไปแล้ววันนี้');
+
+    // Save completion
+    await addDoc(collection(db,'missionCompletions'),{
+      uid, missionId, points, date: today,
+      completedAt: new Date().toISOString()
+    });
+
+    // Add points to user + weekly leaderboard
+    await updateDoc(doc(db,'users',uid), { points: increment(points), wallet: increment(points) });
+    const weekRef = doc(db,'leaderboard',`${week}_${uid}`);
+    const weekSnap = await getDoc(weekRef);
+    if (weekSnap.exists()) {
+      await updateDoc(weekRef, { points: increment(points) });
+    } else {
+      await setDoc(weekRef, {
+        uid, week, points,
+        displayName: session.displayName,
+        avatar:      session.avatar || '',
+      });
+    }
+    loadMissions();
+  };
+
+  // ── Leaderboard ────────────────────────────────────────────
+  async function loadLeaderboard() {
+    const q = query(
+      collection(db,'leaderboard'),
+      where('week','==',week),
+      orderBy('points','desc'),
+      limit(50)
+    );
+    const snap = await getDocs(q);
+    const entries = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderLeaderboard(entries);
+  }
+
+  function renderLeaderboard(entries) {
+    const medals = ['🥇','🥈','🥉'];
+    const myRank = entries.findIndex(e=>e.uid===uid) + 1;
+    document.getElementById('myRank').textContent = myRank ? `# ${myRank}` : '# –';
+
+    if (!entries.length) {
+      document.getElementById('leaderboardList').innerHTML =
+        `<div class="text-center text-gray-300 py-10"><p class="text-4xl mb-2">🏅</p><p class="font-bold text-gray-400">ยังไม่มีข้อมูลสัปดาห์นี้</p></div>`;
+      return;
+    }
+
+    document.getElementById('leaderboardList').innerHTML = entries.map((e,i) => {
+      const isMe = e.uid === uid;
+      return `<div class="fade-in flex items-center gap-3 ${isMe?'bg-amber-50 border border-amber-200':'bg-white border border-gray-100'} rounded-2xl p-3 shadow-sm">
+        <span class="text-xl w-8 text-center flex-shrink-0">${medals[i] || `${i+1}`}</span>
+        <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-xl flex-shrink-0 overflow-hidden">
+          ${e.avatar?.startsWith('http') ? `<img src="${e.avatar}" class="w-full h-full object-cover">` : (e.avatar||'👦🏻')}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-black text-gray-800 text-sm truncate">${e.displayName||'ผู้ใช้'}${isMe?' (คุณ)':''}</p>
+        </div>
+        <p class="font-black text-yellow-600 flex-shrink-0">🪙 ${(e.points||0).toLocaleString()}</p>
+      </div>`;
+    }).join('');
+  }
+
+  loadMissions();
+</script>
+</body>
+</html>

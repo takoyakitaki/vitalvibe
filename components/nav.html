@@ -1,0 +1,57 @@
+<!--
+  components/nav.html
+  ─────────────────────────────────────────────────────────────
+  Copy-paste this <nav> block into every page (food / health /
+  missions / profile).  Update the `data-page` attribute on the
+  matching <a> so it gets the active highlight.
+  ─────────────────────────────────────────────────────────────
+-->
+<nav id="bottomNav"
+     class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md
+            bg-white/95 backdrop-blur border-t border-gray-100
+            flex items-center justify-around pb-safe z-50 shadow-2xl">
+
+  <a href="/pages/food.html"     data-page="food"
+     class="nav-item flex flex-col items-center py-2 px-4 gap-0.5">
+    <span class="text-2xl">🍱</span>
+    <span class="text-[10px] font-bold">อาหาร</span>
+  </a>
+
+  <a href="/pages/health.html"   data-page="health"
+     class="nav-item flex flex-col items-center py-2 px-4 gap-0.5">
+    <span class="text-2xl">📋</span>
+    <span class="text-[10px] font-bold">สุขภาพ</span>
+  </a>
+
+  <a href="/pages/missions.html" data-page="missions"
+     class="nav-item flex flex-col items-center py-2 px-4 gap-0.5">
+    <span class="text-2xl">🏆</span>
+    <span class="text-[10px] font-bold">ภารกิจ</span>
+  </a>
+
+  <a href="/pages/profile.html"  data-page="profile"
+     class="nav-item flex flex-col items-center py-2 px-4 gap-0.5">
+    <span class="text-2xl">👤</span>
+    <span class="text-[10px] font-bold">โปรไฟล์</span>
+  </a>
+</nav>
+
+<style>
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom, 12px); }
+  .nav-item { color: #9ca3af; transition: color .15s; }
+  .nav-item.active,
+  .nav-item:hover  { color: #14b8a6; }
+  .nav-item.active span:first-child { filter: drop-shadow(0 0 6px #14b8a655); }
+</style>
+
+<script>
+  /* Highlight current page */
+  (function() {
+    const page = document.currentScript?.closest('[data-current-page]')
+                 ?.dataset.currentPage
+                 || location.pathname.split('/').pop().replace('.html','');
+    document.querySelectorAll('.nav-item').forEach(a => {
+      if (a.dataset.page === page) a.classList.add('active');
+    });
+  })();
+</script>
