@@ -1,5 +1,9 @@
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
-const DEFAULT_MODELS = ['gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.0-flash-lite'];
+const DEFAULT_MODELS = [
+  'gemini-3.1-flash-lite',
+  'gemini-3.5-flash',
+  'gemini-2.5-flash'
+];
 
 const FOOD_PROMPT = `
 Analyze the food image and estimate nutrition for one visible serving.
