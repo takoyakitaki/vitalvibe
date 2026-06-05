@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VitalVibe - แจ้งเตือน</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { font-family:'Prompt',sans-serif; -webkit-tap-highlight-color:transparent; }
+    body { background:#f8fafc; }
+    .pb-safe { padding-bottom:env(safe-area-inset-bottom,20px); }
+    .hide-scrollbar::-webkit-scrollbar{display:none} .hide-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .fade-in{animation:fadeIn .35s ease-out forwards}
+    input:focus, textarea:focus{outline:none;border-color:#14b8a6}
+    .type-active{background:linear-gradient(135deg,#14b8a6,#10b981);color:#fff;border-color:transparent}
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden">
+<div class="h-full w-full max-w-md mx-auto bg-white shadow-2xl relative flex flex-col">
+
+  <div class="flex-shrink-0 pt-12 pb-4 px-5 bg-white border-b border-gray-100">
+    <p class="text-xs text-gray-400 font-semibold uppercase tracking-widest">VitalVibe</p>
+    <h1 class="text-2xl font-black text-gray-900">⏰ แจ้งเตือน</h1>
+    <p class="text-xs text-gray-400 font-semibold mt-1">ยาและหมอนัดของคุณ</p>
+  </div>
+
+  <div class="flex-1 overflow-y-auto hide-scrollbar pb-32 px-5 pt-5">
+    <div class="bg-gradient-to-r from-teal-500 to-emerald-500 rounded-3xl p-4 text-white mb-5 shadow-lg">
+      <p class="text-xs font-bold opacity-75 uppercase tracking-wider">รายการถัดไป</p>
+      <p id="nextReminderTitle" class="text-2xl font-black mt-1 truncate">ยังไม่มีแจ้งเตือน</p>
+      <p id="nextReminderTime" class="text-sm opacity-80 mt-1">เพิ่มรายการกินยาหรือหมอนัดได้เลย</p>
+    </div>
+
+    <div class="bg-white border border-gray-100 rounded-3xl p-4 shadow-sm mb-5">
+      <h2 class="font-black text-gray-800 mb-3">เพิ่มแจ้งเตือน</h2>
+
+      <div class="grid grid-cols-2 gap-2 mb-3">
+        <button id="typeMedicine" onclick="selectType('medicine')"
+          class="reminder-type type-active border-2 rounded-2xl py-3 text-sm font-black transition">
+          💊 กินยา
+        </button>
+        <button id="typeAppointment" onclick="selectType('appointment')"
+          class="reminder-type border-2 border-gray-200 text-gray-500 rounded-2xl py-3 text-sm font-black transition">
+          🩺 หมอนัด
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs text-gray-400 font-bold uppercase">ชื่อรายการ</label>
+          <input id="reminderTitle" class="mt-1 w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold transition-colors"
+            placeholder="เช่น ยาหลังอาหาร / นัดตรวจสุขภาพ">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs text-gray-400 font-bold uppercase">วันที่</label>
+            <input id="reminderDate" type="date" class="mt-1 w-full border border-gray-200 rounded-2xl px-3 py-2.5 text-sm font-bold transition-colors">
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 font-bold uppercase">เวลา</label>
+            <input id="reminderTime" type="time" class="mt-1 w-full border border-gray-200 rounded-2xl px-3 py-2.5 text-sm font-bold transition-colors">
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-gray-400 font-bold uppercase">หมายเหตุ</label>
+          <textarea id="reminderNote" rows="2" class="mt-1 w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-colors resize-none"
+            placeholder="เช่น หลังอาหารเช้า / อาคาร A ชั้น 3"></textarea>
+        </div>
+      </div>
+
+      <button onclick="saveReminder()"
+        class="mt-4 w-full bg-gradient-to-r from-teal-400 to-emerald-500 text-white font-black py-3 rounded-2xl text-sm active:scale-95 transition shadow-md">
+        💾 บันทึกแจ้งเตือน
+      </button>
+    </div>
+
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="font-black text-gray-800">รายการแจ้งเตือน</h2>
+      <select id="filterStatus" onchange="renderReminders()" class="border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold text-gray-500">
+        <option value="active">กำลังจะมาถึง</option>
+        <option value="all">ทั้งหมด</option>
+        <option value="done">เสร็จแล้ว</option>
+      </select>
+    </div>
+    <div id="reminderList" class="space-y-2"></div>
+  </div>
+
+  <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur border-t border-gray-100 flex items-center justify-around pb-safe z-50 shadow-2xl">
+    <a href="food.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400">
+      <span class="text-xl">🍱</span><span class="text-[10px] font-bold">อาหาร</span></a>
+    <a href="health.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400">
+      <span class="text-xl">📋</span><span class="text-[10px] font-bold">สุขภาพ</span></a>
+    <a href="reminders.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-teal-500">
+      <span class="text-xl">⏰</span><span class="text-[10px] font-bold">เตือน</span></a>
+    <a href="missions.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400">
+      <span class="text-xl">🏆</span><span class="text-[10px] font-bold">ภารกิจ</span></a>
+    <a href="profile.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400">
+      <span class="text-xl">👤</span><span class="text-[10px] font-bold">โปรไฟล์</span></a>
+  </nav>
+</div>
+
+<script type="module">
+  import { requireAuth } from '../lib/auth.js';
+  import { db } from '../lib/firebase.js';
+  import {
+    collection, addDoc, query, where, onSnapshot, deleteDoc, doc, updateDoc
+  } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+  const session = requireAuth();
+  if (!session) await new Promise(() => {});
+  const uid = session.uid;
+
+  let selectedType = 'medicine';
+  let reminders = [];
+
+  const today = new Date();
+  document.getElementById('reminderDate').value = formatLocalDate(today);
+  document.getElementById('reminderTime').value = `${String(today.getHours()).padStart(2,'0')}:${String(today.getMinutes()).padStart(2,'0')}`;
+
+  window.selectType = (type) => {
+    selectedType = type;
+    document.getElementById('typeMedicine').className =
+      type === 'medicine'
+        ? 'reminder-type type-active border-2 rounded-2xl py-3 text-sm font-black transition'
+        : 'reminder-type border-2 border-gray-200 text-gray-500 rounded-2xl py-3 text-sm font-black transition';
+    document.getElementById('typeAppointment').className =
+      type === 'appointment'
+        ? 'reminder-type type-active border-2 rounded-2xl py-3 text-sm font-black transition'
+        : 'reminder-type border-2 border-gray-200 text-gray-500 rounded-2xl py-3 text-sm font-black transition';
+  };
+
+  const q = query(collection(db, 'reminders'), where('uid', '==', uid));
+  onSnapshot(q, snap => {
+    reminders = snap.docs
+      .map(d => ({ id:d.id, ...d.data() }))
+      .sort((a,b) => String(a.scheduledAt || '').localeCompare(String(b.scheduledAt || '')));
+    renderReminders();
+    renderNextReminder();
+  }, err => {
+    console.error('Reminder listener failed:', err);
+    document.getElementById('reminderList').innerHTML =
+      `<div class="text-center text-red-400 py-8 font-bold text-sm">โหลดแจ้งเตือนไม่สำเร็จ: ${err.message}</div>`;
+  });
+
+  window.saveReminder = async () => {
+    const title = document.getElementById('reminderTitle').value.trim();
+    const date = document.getElementById('reminderDate').value;
+    const time = document.getElementById('reminderTime').value;
+    const note = document.getElementById('reminderNote').value.trim();
+    if (!title || !date || !time) return alert('กรุณากรอกชื่อ วันที่ และเวลาให้ครบ');
+
+    const scheduledAt = `${date}T${time}:00`;
+    if (Number.isNaN(new Date(scheduledAt).getTime())) return alert('วันที่หรือเวลาไม่ถูกต้อง');
+
+    try {
+      await addDoc(collection(db, 'reminders'), {
+        uid, type: selectedType, title, note,
+        date, time, scheduledAt,
+        status: 'active',
+        createdAt: new Date().toISOString()
+      });
+      document.getElementById('reminderTitle').value = '';
+      document.getElementById('reminderNote').value = '';
+    } catch (err) {
+      alert('บันทึกแจ้งเตือนไม่สำเร็จ: ' + err.message);
+    }
+  };
+
+  window.renderReminders = () => {
+    const filter = document.getElementById('filterStatus').value;
+    const now = new Date();
+    const filtered = reminders.filter(item => {
+      if (filter === 'all') return true;
+      return item.status === filter;
+    });
+
+    if (!filtered.length) {
+      document.getElementById('reminderList').innerHTML =
+        `<div class="text-center text-gray-300 py-8"><p class="text-4xl mb-2">⏰</p><p class="font-bold text-gray-400">ยังไม่มีรายการแจ้งเตือน</p></div>`;
+      return;
+    }
+
+    document.getElementById('reminderList').innerHTML = filtered.map(item => {
+      const dueDate = new Date(item.scheduledAt);
+      const isOverdue = item.status === 'active' && dueDate < now;
+      const icon = item.type === 'appointment' ? '🩺' : '💊';
+      const typeLabel = item.type === 'appointment' ? 'หมอนัด' : 'กินยา';
+      const dateText = dueDate.toLocaleString('th-TH', { dateStyle:'medium', timeStyle:'short' });
+      return `<div class="fade-in bg-white border ${isOverdue ? 'border-red-200 bg-red-50' : 'border-gray-100'} rounded-2xl p-3 flex items-center gap-3 shadow-sm">
+        <div class="w-11 h-11 rounded-xl ${item.type === 'appointment' ? 'bg-sky-50' : 'bg-teal-50'} flex items-center justify-center text-xl flex-shrink-0">${icon}</div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2">
+            <p class="font-black text-gray-800 text-sm truncate">${escapeHtml(item.title)}</p>
+            <span class="text-[10px] font-bold ${isOverdue ? 'text-red-500 bg-red-100' : 'text-teal-600 bg-teal-50'} px-2 py-0.5 rounded-full">${isOverdue ? 'เลยเวลา' : typeLabel}</span>
+          </div>
+          <p class="text-xs text-gray-400 mt-0.5">${dateText}</p>
+          ${item.note ? `<p class="text-[11px] text-gray-400 truncate mt-0.5">${escapeHtml(item.note)}</p>` : ''}
+        </div>
+        ${item.status === 'done'
+          ? `<span class="text-xs font-black text-green-500 flex-shrink-0">เสร็จแล้ว</span>`
+          : `<button onclick="completeReminder('${item.id}')" class="text-green-500 text-xs font-black flex-shrink-0">เสร็จ</button>`}
+        <button onclick="deleteReminder('${item.id}')" class="text-gray-300 hover:text-red-400 text-lg flex-shrink-0">🗑</button>
+      </div>`;
+    }).join('');
+  };
+
+  function renderNextReminder() {
+    const next = reminders.find(item => item.status === 'active' && new Date(item.scheduledAt) >= new Date());
+    if (!next) {
+      document.getElementById('nextReminderTitle').textContent = 'ยังไม่มีแจ้งเตือน';
+      document.getElementById('nextReminderTime').textContent = 'เพิ่มรายการกินยาหรือหมอนัดได้เลย';
+      return;
+    }
+    document.getElementById('nextReminderTitle').textContent = `${next.type === 'appointment' ? '🩺' : '💊'} ${next.title}`;
+    document.getElementById('nextReminderTime').textContent =
+      new Date(next.scheduledAt).toLocaleString('th-TH', { dateStyle:'medium', timeStyle:'short' });
+  }
+
+  window.completeReminder = async (id) => {
+    try {
+      await updateDoc(doc(db, 'reminders', id), {
+        status: 'done',
+        completedAt: new Date().toISOString()
+      });
+    } catch (err) {
+      alert('อัปเดตสถานะไม่สำเร็จ: ' + err.message);
+    }
+  };
+
+  window.deleteReminder = async (id) => {
+    if (!confirm('ลบแจ้งเตือนนี้?')) return;
+    try {
+      await deleteDoc(doc(db, 'reminders', id));
+    } catch (err) {
+      alert('ลบแจ้งเตือนไม่สำเร็จ: ' + err.message);
+    }
+  };
+
+  function escapeHtml(value = '') {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function formatLocalDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+</script>
+</body>
+</html>

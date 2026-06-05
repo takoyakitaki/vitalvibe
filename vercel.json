@@ -3,6 +3,7 @@
     { "source": "/",              "destination": "/login.html" },
     { "source": "/food",          "destination": "/pages/food.html" },
     { "source": "/health",        "destination": "/pages/health.html" },
+    { "source": "/reminders",     "destination": "/pages/reminders.html" },
     { "source": "/missions",      "destination": "/pages/missions.html" },
     { "source": "/profile",       "destination": "/pages/profile.html" },
     { "source": "/admin",         "destination": "/admin/index.html" }
