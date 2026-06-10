@@ -57,7 +57,15 @@
 
     <!-- History -->
     <div>
-      <h3 class="font-black text-gray-700 mb-3">📅 ประวัติย้อนหลัง</h3>
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-black text-gray-700">📅 ประวัติย้อนหลัง</h3>
+        <select id="historyRange" onchange="loadHistory()" class="border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold text-gray-500">
+          <option value="day">รายวัน</option>
+          <option value="month">รายเดือน</option>
+          <option value="year">รายปี</option>
+          <option value="all">ทั้งหมด</option>
+        </select>
+      </div>
       <div id="historyList" class="space-y-2"></div>
     </div>
 
@@ -84,7 +92,7 @@
   import { db } from '../lib/firebase.js';
   import {
     collection, addDoc, query, where,
-    onSnapshot, deleteDoc, doc
+    onSnapshot, deleteDoc, doc, updateDoc
   } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
   const session = requireAuth();
@@ -97,9 +105,10 @@
       label: 'น้ำหนัก', unit: 'kg', icon: '⚖️',
       gradient: 'from-sky-500 to-blue-600',
       fields: [
-        { id:'w_weight', label:'น้ำหนัก (kg)', type:'number', placeholder:'65.5', step:'0.1' }
+        { id:'w_weight', label:'น้ำหนัก (kg)', type:'number', placeholder:'65.5', step:'0.1' },
+        { id:'w_height', label:'ส่วนสูง (cm)', type:'number', placeholder:'170', step:'0.1' }
       ],
-      display: e => `${e.weight} kg`,
+      display: e => `${e.weight} kg${e.height ? ` · ${e.height} cm` : ''}`,
     },
     sugar: {
       label: 'น้ำตาลในเลือด', unit: 'mg/dL', icon: '🩸',
@@ -125,6 +134,7 @@
 
   let currentType = 'weight';
   let unsubscribe = null;
+  let currentEntries = [];
 
   window.switchType = (btn) => {
     document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
@@ -167,12 +177,15 @@
       data[key] = v;
     });
     if (!valid) return alert('กรุณากรอกข้อมูลให้ครบ');
+    const interpretation = interpretHealthLog(data);
+    data.interpretation = interpretation;
     try {
       await addDoc(collection(db,'healthLogs'), data);
       cfg.fields.forEach(f => {
         const el = document.getElementById(f.id);
         if (el.tagName !== 'SELECT') el.value = '';
       });
+      alert(interpretation);
     } catch (err) {
       alert('บันทึกสุขภาพไม่สำเร็จ: ' + err.message);
     }
@@ -190,7 +203,9 @@
       const entries = snap.docs
         .map(d=>({id:d.id,...d.data()}))
         .sort((a,b)=>String(b.createdAt || '').localeCompare(String(a.createdAt || '')))
+        .filter(matchesHistoryRange)
         .slice(0,30);
+      currentEntries = entries;
       renderHistory(entries, cfg);
       if (entries.length) {
         document.getElementById('latestValue').textContent = cfg.display(entries[0]).split(' ')[0];
@@ -223,10 +238,88 @@
         <div class="flex-1">
           <p class="font-bold text-gray-800 text-sm">${cfg.display(e)}</p>
           <p class="text-xs text-gray-400">${new Date(e.createdAt).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'})}</p>
+          ${e.interpretation ? `<p class="text-[11px] text-sky-500 mt-0.5">${e.interpretation}</p>` : ''}
         </div>
+        <button onclick="editLog('${e.id}')" class="text-sky-500 text-xs font-black flex-shrink-0">แก้</button>
         <button onclick="deleteLog('${e.id}')" class="text-gray-200 hover:text-red-400 transition text-lg flex-shrink-0">🗑</button>
       </div>`).join('');
   }
+
+  function interpretHealthLog(data) {
+    if (data.type === 'weight') {
+      if (!data.weight || !data.height) return 'บันทึกน้ำหนักแล้ว หากใส่ส่วนสูงด้วย ระบบจะคำนวณ BMI ให้';
+      const heightM = data.height / 100;
+      const bmi = data.weight / (heightM * heightM);
+      if (bmi < 18.5) return `BMI ${bmi.toFixed(1)} ต่ำกว่าเกณฑ์ ควรติดตามโภชนาการและน้ำหนัก`;
+      if (bmi < 23) return `BMI ${bmi.toFixed(1)} อยู่ในเกณฑ์ปกติ`;
+      if (bmi < 25) return `BMI ${bmi.toFixed(1)} เริ่มเกินมาตรฐาน ควรดูแลอาหารและกิจกรรม`;
+      if (bmi < 30) return `BMI ${bmi.toFixed(1)} เกินมาตรฐาน ควรวางแผนควบคุมน้ำหนัก`;
+      return `BMI ${bmi.toFixed(1)} สูงมาก ควรปรึกษาผู้เชี่ยวชาญด้านสุขภาพ`;
+    }
+    if (data.type === 'pressure') {
+      const sys = Number(data.sys) || 0;
+      const dia = Number(data.dia) || 0;
+      if (sys >= 180 || dia >= 120) return 'ความดันสูงมาก ควรติดต่อแพทย์ทันทีหากมีอาการผิดปกติ';
+      if (sys >= 140 || dia >= 90) return 'ความดันสูง ควรพัก วัดซ้ำ และปรึกษาแพทย์หากพบซ้ำ';
+      if (sys >= 130 || dia >= 80) return 'ความดันเริ่มสูง ควรติดตามต่อเนื่อง';
+      return 'ความดันอยู่ในช่วงปกติ';
+    }
+    if (data.type === 'sugar') {
+      const sugar = Number(data.sugar) || 0;
+      const context = String(data.context || '');
+      if (context.includes('หลังอาหาร')) {
+        if (sugar >= 200) return 'น้ำตาลหลังอาหารสูง ควรติดตามและปรึกษาแพทย์หากพบซ้ำ';
+        if (sugar >= 140) return 'น้ำตาลหลังอาหารเริ่มสูง ควรระวังอาหารหวาน/แป้ง';
+        return 'น้ำตาลหลังอาหารอยู่ในช่วงที่น่าพอใจ';
+      }
+      if (sugar >= 126) return 'น้ำตาลขณะอดอาหารสูง ควรวัดซ้ำและปรึกษาแพทย์';
+      if (sugar >= 100) return 'น้ำตาลเริ่มสูง ควรติดตามต่อเนื่อง';
+      return 'น้ำตาลอยู่ในช่วงปกติ';
+    }
+    return 'บันทึกข้อมูลสุขภาพแล้ว';
+  }
+
+  function matchesHistoryRange(entry) {
+    const range = document.getElementById('historyRange')?.value || 'day';
+    if (range === 'all') return true;
+    const entryDate = new Date(entry.createdAt);
+    const now = new Date();
+    if (Number.isNaN(entryDate.getTime())) return false;
+    if (range === 'day') {
+      return entryDate.toDateString() === now.toDateString();
+    }
+    if (range === 'month') {
+      return entryDate.getFullYear() === now.getFullYear() && entryDate.getMonth() === now.getMonth();
+    }
+    if (range === 'year') {
+      return entryDate.getFullYear() === now.getFullYear();
+    }
+    return true;
+  }
+
+  window.loadHistory = loadHistory;
+
+  window.editLog = async (id) => {
+    const entry = currentEntries.find(e => e.id === id);
+    if (!entry) return;
+    const cfg = TYPES[entry.type];
+    const updates = {};
+    for (const f of cfg.fields) {
+      const key = f.id.split('_')[1];
+      const next = prompt(f.label, entry[key] ?? '');
+      if (next === null) return;
+      updates[key] = f.type === 'number' ? parseFloat(next) : next;
+      if (f.type === 'number' && Number.isNaN(updates[key])) return alert('กรุณากรอกตัวเลขให้ถูกต้อง');
+    }
+    updates.interpretation = interpretHealthLog({ ...entry, ...updates });
+    updates.updatedAt = new Date().toISOString();
+    try {
+      await updateDoc(doc(db,'healthLogs',id), updates);
+      alert(updates.interpretation);
+    } catch (err) {
+      alert('แก้ไขไม่สำเร็จ: ' + err.message);
+    }
+  };
 
   window.deleteLog = async (id) => {
     if (!confirm('ลบรายการนี้?')) return;

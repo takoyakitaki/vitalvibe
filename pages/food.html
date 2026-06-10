@@ -31,7 +31,11 @@
     </div>
 
     <!-- Calorie summary bar -->
-    <div class="mt-4 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-2xl p-4 text-white">
+    <div class="mt-4 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-2xl p-4 text-white relative">
+      <div class="absolute top-3 right-3 flex gap-1">
+        <button onclick="editCalorieGoal()" class="bg-white/20 hover:bg-white/30 rounded-full px-2 py-1 text-[10px] font-black">Goal</button>
+        <button onclick="openCalorieHistory()" class="bg-white/20 hover:bg-white/30 rounded-full px-2 py-1 text-[10px] font-black">History</button>
+      </div>
       <div class="flex justify-between items-end mb-2">
         <div>
           <p class="text-xs font-bold opacity-75 uppercase tracking-wider">แคลอรี่วันนี้</p>
@@ -45,6 +49,7 @@
       <div class="w-full bg-white/30 rounded-full h-2">
         <div id="calorieBar" class="bg-white rounded-full h-2 transition-all duration-500" style="width:0%"></div>
       </div>
+      <p id="calorieAlert" class="hidden mt-2 text-xs font-bold bg-white/20 rounded-xl px-3 py-2"></p>
     </div>
   </div>
 
@@ -138,6 +143,28 @@
           <p class="text-[10px] text-blue-400">g</p>
         </div>
       </div>
+      <div class="grid grid-cols-4 gap-2">
+        <div class="bg-emerald-50 rounded-2xl p-2 text-center">
+          <p class="text-[10px] text-emerald-500 font-bold mb-1">Carb</p>
+          <input id="foodCarbs" type="number" class="w-full bg-transparent font-black text-emerald-600 text-sm text-center outline-none">
+          <p class="text-[10px] text-emerald-400">g</p>
+        </div>
+        <div class="bg-amber-50 rounded-2xl p-2 text-center">
+          <p class="text-[10px] text-amber-500 font-bold mb-1">Fat</p>
+          <input id="foodFat" type="number" class="w-full bg-transparent font-black text-amber-600 text-sm text-center outline-none">
+          <p class="text-[10px] text-amber-400">g</p>
+        </div>
+        <div class="bg-lime-50 rounded-2xl p-2 text-center">
+          <p class="text-[10px] text-lime-500 font-bold mb-1">Fiber</p>
+          <input id="foodFiber" type="number" class="w-full bg-transparent font-black text-lime-600 text-sm text-center outline-none">
+          <p class="text-[10px] text-lime-400">g</p>
+        </div>
+        <div class="bg-rose-50 rounded-2xl p-2 text-center">
+          <p class="text-[10px] text-rose-500 font-bold mb-1">Na</p>
+          <input id="foodSodium" type="number" class="w-full bg-transparent font-black text-rose-600 text-sm text-center outline-none">
+          <p class="text-[10px] text-rose-400">mg</p>
+        </div>
+      </div>
       <p id="foodNote" class="text-xs text-gray-400 italic px-1"></p>
     </div>
 
@@ -175,6 +202,31 @@
             class="w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold outline-none focus:border-teal-400 mt-1">
         </div>
       </div>
+      <details class="bg-gray-50 rounded-2xl p-3">
+        <summary class="text-xs font-black text-gray-500 cursor-pointer">สารอาหารเพิ่มเติม</summary>
+        <div class="grid grid-cols-2 gap-2 mt-3">
+          <div>
+            <label class="text-[10px] text-gray-400 font-bold uppercase">คาร์โบไฮเดรต (g)</label>
+            <input id="mCarbs" type="number" placeholder="0"
+              class="w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold outline-none focus:border-teal-400 mt-1">
+          </div>
+          <div>
+            <label class="text-[10px] text-gray-400 font-bold uppercase">ไขมัน (g)</label>
+            <input id="mFat" type="number" placeholder="0"
+              class="w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold outline-none focus:border-teal-400 mt-1">
+          </div>
+          <div>
+            <label class="text-[10px] text-gray-400 font-bold uppercase">ใยอาหาร (g)</label>
+            <input id="mFiber" type="number" placeholder="0"
+              class="w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold outline-none focus:border-teal-400 mt-1">
+          </div>
+          <div>
+            <label class="text-[10px] text-gray-400 font-bold uppercase">โซเดียม (mg)</label>
+            <input id="mSodium" type="number" placeholder="0"
+              class="w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold outline-none focus:border-teal-400 mt-1">
+          </div>
+        </div>
+      </details>
       <div class="flex gap-2">
         <button data-meal="เช้า"    onclick="selectMealM(this)" class="meal-btn-m flex-1 py-2 rounded-xl text-xs font-bold border-2 border-teal-400 bg-teal-50 text-teal-600">🌅 เช้า</button>
         <button data-meal="กลางวัน" onclick="selectMealM(this)" class="meal-btn-m flex-1 py-2 rounded-xl text-xs font-bold border-2 border-gray-200 text-gray-500">☀️ กลาง</button>
@@ -189,11 +241,30 @@
   </div>
 </div>
 
+<!-- Calorie History Modal -->
+<div id="calorieHistoryModal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+  <div class="w-full max-w-sm max-h-[86vh] bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+    <div class="bg-gradient-to-r from-teal-500 to-emerald-500 p-4 flex items-center gap-3">
+      <button onclick="closeCalorieHistory()" class="text-white/70 hover:text-white text-xl">x</button>
+      <h2 class="text-white font-black text-lg flex-1 text-center">ประวัติแคลอรี่</h2>
+    </div>
+    <div class="p-4 flex-1 overflow-y-auto hide-scrollbar">
+      <div class="flex items-center gap-2 mb-3">
+        <input id="historyDatePicker" type="date" onchange="renderHistoryDay(this.value)"
+          class="flex-1 border border-gray-200 rounded-2xl px-3 py-2 text-sm font-bold">
+        <button onclick="loadCalorieHistory()" class="bg-teal-50 text-teal-600 rounded-2xl px-3 py-2 text-xs font-black">Reload</button>
+      </div>
+      <div id="calorieHistoryDays" class="space-y-2 mb-4"></div>
+      <div id="calorieHistoryEntries" class="space-y-2"></div>
+    </div>
+  </div>
+</div>
+
 <script type="module">
   import { requireAuth } from '../lib/auth.js';
   import { db } from '../lib/firebase.js';
   import {
-    collection, addDoc, query, where, onSnapshot, deleteDoc, doc, updateDoc
+    collection, addDoc, query, where, onSnapshot, deleteDoc, doc, updateDoc, getDocs, getDoc, setDoc
   } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
   const session = requireAuth();
@@ -208,14 +279,20 @@
   let selectedFile  = null;
   let selectedB64   = null;
   let calorieGoal = 2000;
+  let lineUserId = session.lineUid || null;
+  let latestTodayEntries = [];
+  let historyEntries = [];
 
   onSnapshot(doc(db,'users',uid), snap => {
-    calorieGoal = Number(snap.data()?.calorieGoal) || 2000;
+    const profile = snap.data() || {};
+    calorieGoal = Number(profile.calorieGoal) || 2000;
+    lineUserId = profile.lineUserId || profile.lineUid || session.lineUid || null;
     document.getElementById('calorieGoal').textContent = `${calorieGoal.toLocaleString()} kcal`;
+    updateSummary(latestTodayEntries);
   }, err => console.error('User profile listener failed:', err));
 
   // ── Realtime listener ──────────────────────────────────────
-  const today = new Date().toISOString().split('T')[0];
+  const today = formatLocalDate(new Date());
   const q = query(
     collection(db,'foodLogs'),
     where('uid','==',uid),
@@ -225,6 +302,7 @@
     const entries = snap.docs
       .map(d=>({id:d.id,...d.data()}))
       .sort((a,b)=>String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+    latestTodayEntries = entries;
     renderMeals(entries);
     updateSummary(entries);
   }, err => {
@@ -238,6 +316,57 @@
     document.getElementById('todayCalories').textContent = total.toLocaleString();
     const pct = Math.min(100, (total/calorieGoal)*100);
     document.getElementById('calorieBar').style.width = pct+'%';
+    const alertEl = document.getElementById('calorieAlert');
+    if (total >= calorieGoal && calorieGoal > 0) {
+      alertEl.textContent = 'แคลอรี่วันนี้เต็มแล้ว';
+      alertEl.classList.remove('hidden');
+      notifyCalorieGoalReached(total);
+    } else {
+      alertEl.classList.add('hidden');
+    }
+    saveDailyCalorieSummary(total);
+  }
+
+  async function saveDailyCalorieSummary(total) {
+    try {
+      await setDoc(doc(db, 'dailyCalorieSummaries', `${uid}_${today}`), {
+        uid, date: today, calories: total, goal: calorieGoal,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    } catch (err) {
+      console.warn('Daily calorie summary save failed:', err);
+    }
+  }
+
+  async function notifyCalorieGoalReached(total) {
+    const notifyRef = doc(db, 'calorieNotifications', `${uid}_${today}`);
+    try {
+      const notifySnap = await getDoc(notifyRef);
+      if (notifySnap.exists()) return;
+      await setDoc(notifyRef, {
+        uid, date: today, calories: total, goal: calorieGoal,
+        status: lineUserId ? 'pending' : 'no_line_user',
+        createdAt: new Date().toISOString()
+      });
+      if (!lineUserId) return;
+      const res = await fetch('/api/send-line-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: lineUserId,
+          text: `VitalVibe: แคลอรี่วันนี้เต็มแล้ว (${total.toLocaleString()} / ${calorieGoal.toLocaleString()} kcal)`
+        })
+      });
+      await updateDoc(notifyRef, {
+        status: res.ok ? 'sent' : 'failed',
+        notifiedAt: new Date().toISOString()
+      });
+    } catch (err) {
+      console.warn('Calorie LINE notification failed:', err);
+      try {
+        await setDoc(notifyRef, { status: 'failed', error: err.message, updatedAt: new Date().toISOString() }, { merge: true });
+      } catch (_) {}
+    }
   }
 
   function renderMeals(entries) {
@@ -260,9 +389,10 @@
           <div class="flex-1 min-w-0">
             <p class="font-bold text-gray-800 text-sm truncate">${e.name}</p>
             <p class="text-xs text-gray-400">${e.calories||0} kcal${e.protein?` · ${e.protein}g โปรตีน`:''}</p>
+            <p class="text-[11px] text-gray-300">C ${e.carbs||0}g ยท F ${e.fat||0}g ยท Fiber ${e.fiber||0}g ยท Na ${e.sodium||0}mg</p>
             ${e.note ? `<p class="text-[11px] text-gray-400 truncate">${e.note}</p>` : ''}
           </div>
-          <button onclick="editEntry('${e.id}','${encodeURIComponent(e.name||'')}',${e.calories||0},${e.protein||0},'${encodeURIComponent(e.note||'')}')" class="text-gray-300 hover:text-teal-500 transition text-sm font-black flex-shrink-0">แก้</button>
+          <button onclick="editEntry('${e.id}','${encodeURIComponent(e.name||'')}',${e.calories||0},${e.carbs||0},${e.protein||0},${e.fat||0},${e.fiber||0},${e.sodium||0},'${encodeURIComponent(e.note||'')}')" class="text-gray-300 hover:text-teal-500 transition text-sm font-black flex-shrink-0">แก้</button>
           <button onclick="deleteEntry('${e.id}')" class="text-gray-300 hover:text-red-400 transition text-lg flex-shrink-0">🗑</button>
         </div>`;
       });
@@ -285,13 +415,21 @@
     }
   };
 
-  window.editEntry = async (id, encodedName, calories, protein, encodedNote) => {
+  window.editEntry = async (id, encodedName, calories, carbs, protein, fat, fiber, sodium, encodedNote) => {
     const name = prompt('ชื่ออาหาร', decodeURIComponent(encodedName));
     if (name === null) return;
     const calInput = prompt('แคลอรี่ (kcal)', calories);
     if (calInput === null) return;
     const proteinInput = prompt('โปรตีน (g)', protein);
     if (proteinInput === null) return;
+    const carbsInput = prompt('คาร์โบไฮเดรต (g)', carbs);
+    if (carbsInput === null) return;
+    const fatInput = prompt('ไขมัน (g)', fat);
+    if (fatInput === null) return;
+    const fiberInput = prompt('ใยอาหาร (g)', fiber);
+    if (fiberInput === null) return;
+    const sodiumInput = prompt('โซเดียม (mg)', sodium);
+    if (sodiumInput === null) return;
     const note = prompt('หมายเหตุ', decodeURIComponent(encodedNote));
     if (note === null) return;
 
@@ -299,7 +437,11 @@
       await updateDoc(doc(db,'foodLogs',id), {
         name: name.trim() || 'ไม่ระบุชื่อ',
         calories: Math.max(0, parseInt(calInput) || 0),
+        carbs: Math.max(0, parseInt(carbsInput) || 0),
         protein: Math.max(0, parseInt(proteinInput) || 0),
+        fat: Math.max(0, parseInt(fatInput) || 0),
+        fiber: Math.max(0, parseInt(fiberInput) || 0),
+        sodium: Math.max(0, parseInt(sodiumInput) || 0),
         note: note.trim(),
         updatedAt: new Date().toISOString()
       });
@@ -403,7 +545,11 @@
       const parsed = data.food || {};
       document.getElementById('foodName').value     = parsed.name     || '';
       document.getElementById('foodCalories').value = parsed.calories || '';
+      document.getElementById('foodCarbs').value    = parsed.carbs    || '';
       document.getElementById('foodProtein').value  = parsed.protein  || '';
+      document.getElementById('foodFat').value      = parsed.fat      || '';
+      document.getElementById('foodFiber').value    = parsed.fiber    || '';
+      document.getElementById('foodSodium').value   = parsed.sodium   || '';
       document.getElementById('foodNote').textContent = parsed.note   || '';
       document.getElementById('analyzeResult').classList.remove('hidden');
       document.getElementById('saveBtn').classList.remove('hidden');
@@ -417,12 +563,16 @@
   window.saveFoodEntry = async () => {
     const name     = document.getElementById('foodName').value.trim();
     const calories = Math.max(0, parseInt(document.getElementById('foodCalories').value)||0);
+    const carbs    = Math.max(0, parseInt(document.getElementById('foodCarbs').value)||0);
     const protein  = Math.max(0, parseInt(document.getElementById('foodProtein').value)||0);
+    const fat      = Math.max(0, parseInt(document.getElementById('foodFat').value)||0);
+    const fiber    = Math.max(0, parseInt(document.getElementById('foodFiber').value)||0);
+    const sodium   = Math.max(0, parseInt(document.getElementById('foodSodium').value)||0);
     const note     = document.getElementById('foodNote').textContent.trim();
     if (!name) return alert('กรุณาระบุชื่ออาหาร');
     try {
       await addDoc(collection(db,'foodLogs'),{
-        uid, name, calories, protein, note, meal: selectedMeal,
+        uid, name, calories, carbs, protein, fat, fiber, sodium, note, meal: selectedMeal,
         source: 'ai', analyzedBy: 'gemini',
         date: today, createdAt: new Date().toISOString()
       });
@@ -435,22 +585,100 @@
   window.saveManualEntry = async () => {
     const name     = document.getElementById('mFoodName').value.trim();
     const calories = Math.max(0, parseInt(document.getElementById('mCalories').value)||0);
+    const carbs    = Math.max(0, parseInt(document.getElementById('mCarbs').value)||0);
     const protein  = Math.max(0, parseInt(document.getElementById('mProtein').value)||0);
+    const fat      = Math.max(0, parseInt(document.getElementById('mFat').value)||0);
+    const fiber    = Math.max(0, parseInt(document.getElementById('mFiber').value)||0);
+    const sodium   = Math.max(0, parseInt(document.getElementById('mSodium').value)||0);
     if (!name) return alert('กรุณาระบุชื่ออาหาร');
     try {
       await addDoc(collection(db,'foodLogs'),{
-        uid, name, calories, protein, meal: selectedMealM,
+        uid, name, calories, carbs, protein, fat, fiber, sodium, meal: selectedMealM,
         source: 'manual',
         date: today, createdAt: new Date().toISOString()
       });
       document.getElementById('manualModal').classList.add('hidden');
       document.getElementById('mFoodName').value = '';
       document.getElementById('mCalories').value = '';
+      document.getElementById('mCarbs').value = '';
       document.getElementById('mProtein').value  = '';
+      document.getElementById('mFat').value = '';
+      document.getElementById('mFiber').value = '';
+      document.getElementById('mSodium').value = '';
     } catch (err) {
       alert('บันทึกอาหารไม่สำเร็จ: ' + err.message);
     }
   };
+
+  window.editCalorieGoal = async () => {
+    const next = prompt('เป้าหมายแคลอรี่ต่อวัน (kcal)', calorieGoal);
+    if (next === null) return;
+    const value = Math.max(1, parseInt(next) || 2000);
+    try {
+      await updateDoc(doc(db,'users',uid), { calorieGoal: value });
+    } catch (err) {
+      alert('บันทึกเป้าหมายไม่สำเร็จ: ' + err.message);
+    }
+  };
+
+  window.openCalorieHistory = async () => {
+    document.getElementById('calorieHistoryModal').classList.remove('hidden');
+    document.getElementById('historyDatePicker').value = today;
+    await loadCalorieHistory();
+  };
+
+  window.closeCalorieHistory = () => {
+    document.getElementById('calorieHistoryModal').classList.add('hidden');
+  };
+
+  window.loadCalorieHistory = async () => {
+    const snap = await getDocs(query(collection(db,'foodLogs'), where('uid','==',uid)));
+    historyEntries = snap.docs
+      .map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>String(b.date || '').localeCompare(String(a.date || '')) || String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+
+    const byDate = new Map();
+    historyEntries.forEach(e => {
+      const date = e.date || (e.createdAt ? formatLocalDate(new Date(e.createdAt)) : today);
+      const current = byDate.get(date) || { date, calories: 0, count: 0 };
+      current.calories += Number(e.calories) || 0;
+      current.count += 1;
+      byDate.set(date, current);
+    });
+
+    const days = [...byDate.values()].sort((a,b)=>b.date.localeCompare(a.date));
+    document.getElementById('calorieHistoryDays').innerHTML = days.length
+      ? days.map(day => `
+        <button onclick="renderHistoryDay('${day.date}')" class="w-full border border-gray-100 rounded-2xl px-3 py-2 text-left flex items-center justify-between">
+          <span class="font-black text-gray-700 text-sm">${day.date}</span>
+          <span class="text-xs font-bold text-teal-600">${day.calories.toLocaleString()} kcal · ${day.count} รายการ</span>
+        </button>`).join('')
+      : '<p class="text-center text-gray-300 py-6 font-bold text-sm">ยังไม่มีประวัติแคลอรี่</p>';
+    renderHistoryDay(document.getElementById('historyDatePicker').value || today);
+  };
+
+  window.renderHistoryDay = (date) => {
+    document.getElementById('historyDatePicker').value = date;
+    const entries = historyEntries.filter(e => (e.date || (e.createdAt ? formatLocalDate(new Date(e.createdAt)) : '')) === date);
+    const total = entries.reduce((sum,e)=>sum+(Number(e.calories)||0),0);
+    document.getElementById('calorieHistoryEntries').innerHTML = entries.length
+      ? `<div class="font-black text-gray-700 text-sm mb-2">รวม ${total.toLocaleString()} kcal</div>` + entries.map(e => `
+        <div class="bg-white border border-gray-100 rounded-2xl p-3 flex items-center gap-3 shadow-sm">
+          <div class="flex-1 min-w-0">
+            <p class="font-bold text-gray-800 text-sm truncate">${e.name || 'ไม่ระบุชื่อ'}</p>
+            <p class="text-xs text-gray-400">${e.calories||0} kcal · โปรตีน ${e.protein||0}g · ${e.meal||'-'}</p>
+          </div>
+          <button onclick="editEntry('${e.id}','${encodeURIComponent(e.name||'')}',${e.calories||0},${e.carbs||0},${e.protein||0},${e.fat||0},${e.fiber||0},${e.sodium||0},'${encodeURIComponent(e.note||'')}')" class="text-teal-500 text-xs font-black">แก้</button>
+        </div>`).join('')
+      : '<p class="text-center text-gray-300 py-6 font-bold text-sm">วันนี้ยังไม่มีรายการอาหาร</p>';
+  };
+
+  function formatLocalDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
 </script>
 </body>
 </html>

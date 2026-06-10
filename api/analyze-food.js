@@ -8,11 +8,13 @@ const DEFAULT_MODELS = [
 const FOOD_PROMPT = `
 Analyze the food image and estimate nutrition for one visible serving.
 Return strict JSON only, with this exact shape:
-{"name":"Thai food name","calories":number,"protein":number,"note":"short Thai note"}
+{"name":"Thai food name","calories":number,"carbs":number,"protein":number,"fat":number,"fiber":number,"sodium":number,"note":"short Thai note"}
 
 Rules:
 - Use Thai for name and note.
 - calories must be estimated kcal for the visible serving.
+- carbs, protein, fat, and fiber must be estimated grams.
+- sodium must be estimated milligrams.
 - protein must be estimated grams of protein.
 - If there are multiple foods, name the main dish and include the rest in note.
 - If the image is not food, return {"name":"","calories":0,"protein":0,"note":"ไม่พบอาหารในภาพ"}
@@ -40,7 +42,11 @@ function parseFood(text = '') {
   return {
     name: String(parsed.name || '').trim(),
     calories: Math.max(0, Math.round(Number(parsed.calories) || 0)),
+    carbs: Math.max(0, Math.round(Number(parsed.carbs) || 0)),
     protein: Math.max(0, Math.round(Number(parsed.protein) || 0)),
+    fat: Math.max(0, Math.round(Number(parsed.fat) || 0)),
+    fiber: Math.max(0, Math.round(Number(parsed.fiber) || 0)),
+    sodium: Math.max(0, Math.round(Number(parsed.sodium) || 0)),
     note: String(parsed.note || '').trim(),
   };
 }

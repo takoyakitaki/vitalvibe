@@ -138,6 +138,7 @@
       .sort((a,b) => String(a.scheduledAt || '').localeCompare(String(b.scheduledAt || '')));
     renderReminders();
     renderNextReminder();
+    checkDueMedicineReminders();
   }, err => {
     console.error('Reminder listener failed:', err);
     document.getElementById('reminderList').innerHTML =
@@ -217,6 +218,43 @@
     document.getElementById('nextReminderTime').textContent =
       new Date(next.scheduledAt).toLocaleString('th-TH', { dateStyle:'medium', timeStyle:'short' });
   }
+
+  async function checkDueMedicineReminders() {
+    const now = new Date();
+    const due = reminders.filter(item =>
+      item.type === 'medicine' &&
+      item.status === 'active' &&
+      !item.notifiedAt &&
+      new Date(item.scheduledAt) <= now
+    );
+    for (const item of due) {
+      try {
+        if (!session.lineUid) {
+          await updateDoc(doc(db, 'reminders', item.id), {
+            notifiedAt: new Date().toISOString(),
+            notifyStatus: 'no_line_user'
+          });
+          continue;
+        }
+        const res = await fetch('/api/send-line-message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: session.lineUid,
+            text: `VitalVibe: ถึงเวลาทานยา ${item.title}${item.note ? ` (${item.note})` : ''}`
+          })
+        });
+        await updateDoc(doc(db, 'reminders', item.id), {
+          notifiedAt: new Date().toISOString(),
+          notifyStatus: res.ok ? 'sent' : 'failed'
+        });
+      } catch (err) {
+        console.warn('Medicine reminder LINE notification failed:', err);
+      }
+    }
+  }
+
+  setInterval(checkDueMedicineReminders, 60000);
 
   window.completeReminder = async (id) => {
     try {
