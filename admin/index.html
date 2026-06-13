@@ -21,14 +21,14 @@
 
   <!-- Nav tabs -->
   <div class="flex flex-wrap gap-2 mb-6">
-    <button onclick="showSection('users')"      class="admin-tab px-4 py-2 rounded-lg text-sm font-bold bg-blue-500 text-white">👥 Users</button>
-    <button onclick="showSection('foodLogs')"   class="admin-tab px-4 py-2 rounded-lg text-sm font-bold bg-gray-200 text-gray-600">🍱 Food Logs</button>
-    <button onclick="showSection('healthLogs')" class="admin-tab px-4 py-2 rounded-lg text-sm font-bold bg-gray-200 text-gray-600">📋 Health Logs</button>
-    <button onclick="showSection('reminders')" class="admin-tab px-4 py-2 rounded-lg text-sm font-bold bg-gray-200 text-gray-600">⏰ Reminders</button>
+    <button onclick="showSection('dashboard')"  class="admin-tab px-4 py-2 rounded-lg text-sm font-bold bg-blue-500 text-white">📊 Dashboard</button>
+    <button onclick="showSection('users')"      class="admin-tab px-4 py-2 rounded-lg text-sm font-bold bg-gray-200 text-gray-600">👥 Users</button>
     <button onclick="showSection('missions')"   class="admin-tab px-4 py-2 rounded-lg text-sm font-bold bg-gray-200 text-gray-600">🏆 Missions</button>
     <button onclick="showSection('rewards')"    class="admin-tab px-4 py-2 rounded-lg text-sm font-bold bg-gray-200 text-gray-600">🎁 Rewards</button>
+    <button onclick="showSection('foodLogs')"   class="admin-tab px-4 py-2 rounded-lg text-sm font-bold bg-gray-200 text-gray-600">🍱 Food Logs</button>
+    <button onclick="showSection('healthLogs')" class="admin-tab px-4 py-2 rounded-lg text-sm font-bold bg-gray-200 text-gray-600">📋 Health Logs</button>
+    <button onclick="showSection('reminders')"  class="admin-tab px-4 py-2 rounded-lg text-sm font-bold bg-gray-200 text-gray-600">⏰ Reminders</button>
     <button onclick="showSection('redemptions')" class="admin-tab px-4 py-2 rounded-lg text-sm font-bold bg-gray-200 text-gray-600">🧾 Redemptions</button>
-    <button onclick="showSection('leaderboard')" class="admin-tab px-4 py-2 rounded-lg text-sm font-bold bg-gray-200 text-gray-600">🥇 Leaderboard</button>
   </div>
 
   <!-- Sections -->
@@ -36,37 +36,50 @@
     <p class="text-gray-400 text-sm">เลือกหัวข้อด้านบน</p>
   </div>
 
-  <!-- Add Reward Form -->
-  <div id="addRewardForm" class="hidden mt-6 bg-white border border-gray-200 rounded-xl p-4">
-    <h2 class="font-black text-gray-800 mb-4">➕ เพิ่มของรางวัล</h2>
-    <div class="grid grid-cols-2 gap-3 mb-3">
-      <div><label class="text-xs font-bold text-gray-500">ชื่อรางวัล</label>
-        <input id="rTitle" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" placeholder="Starbucks Gift Card"></div>
-      <div><label class="text-xs font-bold text-gray-500">แต้มที่ต้องใช้</label>
-        <input id="rPoints" type="number" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" placeholder="500"></div>
-      <div><label class="text-xs font-bold text-gray-500">emoji / ไอคอน</label>
-        <input id="rImage" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" placeholder="☕"></div>
-      <div><label class="text-xs font-bold text-gray-500">คำอธิบาย</label>
-        <input id="rDesc" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" placeholder="คำอธิบายรางวัล"></div>
+  <!-- Modal for Add/Edit Reward -->
+  <div id="rewardModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+      <h2 id="rewardModalTitle" class="font-black text-gray-800 mb-4">➕ เพิ่มของรางวัล</h2>
+      <div class="space-y-3 mb-4">
+        <div><label class="text-xs font-bold text-gray-500">ชื่อรางวัล</label>
+          <input id="rTitle" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" placeholder="Starbucks Gift Card"></div>
+        <div><label class="text-xs font-bold text-gray-500">แต้มที่ต้องใช้</label>
+          <input id="rPoints" type="number" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" placeholder="500"></div>
+        <div><label class="text-xs font-bold text-gray-500">emoji / ไอคอน</label>
+          <input id="rImage" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" placeholder="☕"></div>
+        <div><label class="text-xs font-bold text-gray-500">คำอธิบาย</label>
+          <input id="rDesc" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" placeholder="คำอธิบายรางวัล"></div>
+      </div>
+      <div class="flex gap-2">
+        <button id="rewardSaveBtn" onclick="saveReward()" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2 rounded-lg text-sm">บันทึก</button>
+        <button onclick="closeRewardModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold px-4 py-2 rounded-lg text-sm">ยกเลิก</button>
+      </div>
     </div>
-    <button onclick="addReward()" class="bg-green-500 text-white font-bold px-6 py-2 rounded-lg text-sm">บันทึก</button>
   </div>
 
-  <!-- Add Mission Form -->
-  <div id="addMissionForm" class="hidden mt-6 bg-white border border-gray-200 rounded-xl p-4">
-    <h2 class="font-black text-gray-800 mb-4">➕ เพิ่มภารกิจ</h2>
-    <div class="grid grid-cols-2 gap-3 mb-3">
-      <div><label class="text-xs font-bold text-gray-500">ชื่อภารกิจ</label>
-        <input id="mTitle" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" placeholder="บันทึกอาหาร 3 มื้อ"></div>
-      <div><label class="text-xs font-bold text-gray-500">แต้มที่ได้รับ</label>
-        <input id="mPoints" type="number" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" placeholder="50"></div>
-      <div><label class="text-xs font-bold text-gray-500">emoji</label>
-        <input id="mIcon" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" placeholder="🍱"></div>
-      <div><label class="text-xs font-bold text-gray-500">คำอธิบาย</label>
-        <input id="mDesc" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" placeholder="บันทึกอาหารครบ 3 มื้อ"></div>
+  <!-- Modal for Add/Edit Mission -->
+  <div id="missionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+      <h2 id="missionModalTitle" class="font-black text-gray-800 mb-4">➕ เพิ่มภารกิจ</h2>
+      <div class="space-y-3 mb-4">
+        <div><label class="text-xs font-bold text-gray-500">ชื่อภารกิจ</label>
+          <input id="mTitle" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" placeholder="บันทึกอาหาร 3 มื้อ"></div>
+        <div><label class="text-xs font-bold text-gray-500">แต้มที่ได้รับ</label>
+          <input id="mPoints" type="number" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" placeholder="50"></div>
+        <div><label class="text-xs font-bold text-gray-500">emoji</label>
+          <input id="mIcon" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" placeholder="🍱"></div>
+        <div><label class="text-xs font-bold text-gray-500">คำอธิบาย</label>
+          <input id="mDesc" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" placeholder="บันทึกอาหารครบ 3 มื้อ"></div>
+      </div>
+      <div class="flex gap-2">
+        <button id="missionSaveBtn" onclick="saveMission()" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2 rounded-lg text-sm">บันทึก</button>
+        <button onclick="closeMissionModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold px-4 py-2 rounded-lg text-sm">ยกเลิก</button>
+      </div>
     </div>
-    <button onclick="addMission()" class="bg-green-500 text-white font-bold px-6 py-2 rounded-lg text-sm">บันทึก</button>
   </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="hidden fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg font-bold shadow-lg z-40"></div>
 
 </div><!-- /max-w -->
 
@@ -74,7 +87,7 @@
   import { db, ADMIN_UIDS } from '../lib/firebase.js';
   import { getSession } from '../lib/auth.js';
   import {
-    collection, getDocs, doc, deleteDoc, addDoc
+    collection, getDocs, doc, deleteDoc, addDoc, updateDoc
   } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
   // Check admin
@@ -90,6 +103,63 @@
   }
 
   let currentSection = '';
+  let editingRewardId = null;
+  let editingMissionId = null;
+
+  // Toast notification
+  const showToast = (msg, type = 'success') => {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg font-bold shadow-lg z-40 ${
+      type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+    }`;
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('hidden'), 3000);
+  };
+
+  // Dashboard section
+  const loadDashboard = async () => {
+    const el = document.getElementById('sectionContent');
+    el.innerHTML = '<p class="text-gray-400 text-sm animate-pulse">กำลังโหลด…</p>';
+
+    try {
+      const missions = await getDocs(collection(db, 'missions'));
+      const rewards = await getDocs(collection(db, 'rewards'));
+      const users = await getDocs(collection(db, 'users'));
+      const redemptions = await getDocs(collection(db, 'redemptions'));
+
+      const today = new Date().toDateString();
+      const missionsToday = missions.docs.filter(d => new Date(d.data().createdAt).toDateString() === today).length;
+      const rewardsToday = rewards.docs.filter(d => new Date(d.data().createdAt).toDateString() === today).length;
+
+      el.innerHTML = `
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p class="text-gray-600 text-xs font-bold">🏆 Missions ทั้งหมด</p>
+            <p class="text-3xl font-black text-blue-600 mt-2">${missions.size}</p>
+            <p class="text-xs text-gray-500 mt-1">วันนี้: ${missionsToday}</p>
+          </div>
+          <div class="bg-pink-50 border border-pink-200 rounded-lg p-4">
+            <p class="text-gray-600 text-xs font-bold">🎁 Rewards ทั้งหมด</p>
+            <p class="text-3xl font-black text-pink-600 mt-2">${rewards.size}</p>
+            <p class="text-xs text-gray-500 mt-1">วันนี้: ${rewardsToday}</p>
+          </div>
+          <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <p class="text-gray-600 text-xs font-bold">👥 Users ทั้งหมด</p>
+            <p class="text-3xl font-black text-purple-600 mt-2">${users.size}</p>
+            <p class="text-xs text-gray-500 mt-1">Active users</p>
+          </div>
+          <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+            <p class="text-gray-600 text-xs font-bold">🧾 Redemptions</p>
+            <p class="text-3xl font-black text-orange-600 mt-2">${redemptions.size}</p>
+            <p class="text-xs text-gray-500 mt-1">Total exchanges</p>
+          </div>
+        </div>
+      `;
+    } catch (err) {
+      el.innerHTML = `<p class="text-red-500 font-bold p-4">❌ เกิดข้อผิดพลาด: ${err.message}</p>`;
+    }
+  };
 
   window.showSection = async (section) => {
     if (!isAdmin) return;
@@ -99,31 +169,96 @@
       .find(b => b.getAttribute('onclick') === `showSection('${section}')`);
     if (activeTab) activeTab.className='admin-tab px-4 py-2 rounded-lg text-sm font-bold bg-blue-500 text-white';
 
-    document.getElementById('addRewardForm').classList.add('hidden');
-    document.getElementById('addMissionForm').classList.add('hidden');
+    if (section === 'dashboard') {
+      return await loadDashboard();
+    }
 
     const el = document.getElementById('sectionContent');
     el.innerHTML = '<p class="text-gray-400 text-sm animate-pulse">กำลังโหลด…</p>';
 
-    const snap = await getDocs(collection(db, section));
-    const docs = snap.docs
-      .map(d=>({_id:d.id,...d.data()}))
-      .sort((a,b)=>String(b.createdAt || b.redeemedAt || '').localeCompare(String(a.createdAt || a.redeemedAt || '')));
+    try {
+      const snap = await getDocs(collection(db, section));
+      const docs = snap.docs
+        .map(d=>({_id:d.id,...d.data()}))
+        .sort((a,b)=>String(b.createdAt || b.redeemedAt || '').localeCompare(String(a.createdAt || a.redeemedAt || '')));
 
-    if (!docs.length) {
-      el.innerHTML = `<p class="text-gray-400 text-sm p-4">ไม่มีข้อมูล</p>`;
-      if (section === 'rewards')  document.getElementById('addRewardForm').classList.remove('hidden');
-      if (section === 'missions') document.getElementById('addMissionForm').classList.remove('hidden');
-      return;
+      if (!docs.length) {
+        el.innerHTML = `<p class="text-gray-400 text-sm p-4">ไม่มีข้อมูล</p>`;
+        if (section === 'rewards') {
+          el.innerHTML += `<button onclick="openRewardModal()" class="mt-4 bg-green-500 text-white text-sm font-bold px-4 py-2 rounded-lg">➕ เพิ่มรางวัล</button>`;
+        }
+        if (section === 'missions') {
+          el.innerHTML += `<button onclick="openMissionModal()" class="mt-4 bg-green-500 text-white text-sm font-bold px-4 py-2 rounded-lg">➕ เพิ่มภารกิจ</button>`;
+        }
+        return;
+      }
+
+      if (section === 'missions') {
+        renderMissions(docs);
+      } else if (section === 'rewards') {
+        renderRewards(docs);
+      } else {
+        renderTable(section, docs);
+      }
+    } catch (err) {
+      el.innerHTML = `<p class="text-red-500 font-bold p-4">❌ เกิดข้อผิดพลาด: ${err.message}</p>`;
     }
+  };
 
+  const renderMissions = (missions) => {
+    const el = document.getElementById('sectionContent');
+    let html = `<div class="flex justify-between items-center mb-4">
+      <p class="text-sm font-bold text-gray-600">${missions.length} ภารกิจ</p>
+      <button onclick="openMissionModal()" class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold px-4 py-2 rounded-lg">➕ เพิ่ม</button>
+    </div><div class="space-y-2">`;
+    
+    missions.forEach(m => {
+      html += `<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 flex justify-between items-start">
+        <div>
+          <p class="font-bold text-gray-800"><span class="text-lg">${m.icon || '🏆'}</span> ${m.title}</p>
+          <p class="text-xs text-gray-600 mt-1">${m.desc || ''}</p>
+          <p class="text-sm font-bold text-blue-600 mt-2">⭐ ${m.points} แต้ม</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="editMission('${m._id}')" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded">✏️ แก้ไข</button>
+          <button onclick="deleteRow('missions','${m._id}')" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded">🗑 ลบ</button>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+    el.innerHTML = html;
+  };
+
+  const renderRewards = (rewards) => {
+    const el = document.getElementById('sectionContent');
+    let html = `<div class="flex justify-between items-center mb-4">
+      <p class="text-sm font-bold text-gray-600">${rewards.length} รางวัล</p>
+      <button onclick="openRewardModal()" class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold px-4 py-2 rounded-lg">➕ เพิ่ม</button>
+    </div><div class="space-y-2">`;
+    
+    rewards.forEach(r => {
+      html += `<div class="bg-gray-50 border border-gray-200 rounded-lg p-4 flex justify-between items-start">
+        <div>
+          <p class="font-bold text-gray-800"><span class="text-lg">${r.image || '🎁'}</span> ${r.title}</p>
+          <p class="text-xs text-gray-600 mt-1">${r.description || ''}</p>
+          <p class="text-sm font-bold text-pink-600 mt-2">💰 ต้องใช้ ${r.points} แต้ม</p>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="editReward('${r._id}')" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded">✏️ แก้ไข</button>
+          <button onclick="deleteRow('rewards','${r._id}')" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded">🗑 ลบ</button>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+    el.innerHTML = html;
+  };
+
+  const renderTable = (section, docs) => {
+    const el = document.getElementById('sectionContent');
     const cols = Object.keys(docs[0]).filter(k=>k!=='_id');
     let html = `<div class="flex justify-between items-center mb-3">
-      <p class="text-sm font-bold text-gray-600">${docs.length} รายการ</p>`;
-    if (section === 'rewards')      html += `<button onclick="document.getElementById('addRewardForm').classList.toggle('hidden')" class="bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg">➕ เพิ่มรางวัล</button>`;
-    if (section === 'missions')     html += `<button onclick="document.getElementById('addMissionForm').classList.toggle('hidden')" class="bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg">➕ เพิ่มภารกิจ</button>`;
-    if (section === 'redemptions')  html += `<p class="text-xs text-gray-400">อัปเดตสถานะได้ที่ Firestore Console</p>`;
-    html += `</div><table><thead><tr><th>#</th>${cols.map(c=>`<th>${c}</th>`).join('')}<th>Action</th></tr></thead><tbody>`;
+      <p class="text-sm font-bold text-gray-600">${docs.length} รายการ</p>
+    </div><div class="overflow-x-auto"><table><thead><tr><th>#</th>${cols.map(c=>`<th>${c}</th>`).join('')}<th>Action</th></tr></thead><tbody>`;
 
     docs.forEach((d,i) => {
       html += `<tr>
@@ -131,49 +266,138 @@
         ${cols.map(c=>{
           const v = d[c];
           const str = typeof v === 'object' ? JSON.stringify(v) : String(v??'–');
-          // Truncate long values
           return `<td class="max-w-xs truncate" title="${str}">${str.length>80?str.slice(0,80)+'…':str}</td>`;
         }).join('')}
         <td><button onclick="deleteRow('${section}','${d._id}')" class="text-red-400 hover:text-red-600 text-xs font-bold">🗑 ลบ</button></td>
       </tr>`;
     });
-    html += '</tbody></table>';
+    html += '</tbody></table></div>';
     el.innerHTML = html;
   };
 
   window.deleteRow = async (col, id) => {
     if (!confirm(`ลบ ID: ${id} ?`)) return;
-    await deleteDoc(doc(db, col, id));
-    window.showSection(currentSection);
+    try {
+      await deleteDoc(doc(db, col, id));
+      showToast('ลบข้อมูลสำเร็จ', 'success');
+      window.showSection(currentSection);
+    } catch (err) {
+      showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+    }
   };
 
-  window.addReward = async () => {
+  // Reward Modal Functions
+  window.openRewardModal = () => {
+    editingRewardId = null;
+    document.getElementById('rewardModalTitle').textContent = '➕ เพิ่มของรางวัล';
+    ['rTitle','rPoints','rImage','rDesc'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('rewardModal').classList.remove('hidden');
+  };
+
+  window.closeRewardModal = () => {
+    document.getElementById('rewardModal').classList.add('hidden');
+  };
+
+  window.editReward = async (id) => {
+    editingRewardId = id;
+    try {
+      const snap = await getDocs(collection(db, 'rewards'));
+      const reward = snap.docs.find(d => d.id === id)?.data();
+      if (!reward) return showToast('ไม่พบรางวัล', 'error');
+      
+      document.getElementById('rewardModalTitle').textContent = '✏️ แก้ไขรางวัล';
+      document.getElementById('rTitle').value = reward.title;
+      document.getElementById('rPoints').value = reward.points;
+      document.getElementById('rImage').value = reward.image;
+      document.getElementById('rDesc').value = reward.description;
+      document.getElementById('rewardModal').classList.remove('hidden');
+    } catch (err) {
+      showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+    }
+  };
+
+  window.saveReward = async () => {
     const title = document.getElementById('rTitle').value.trim();
     const pts   = parseInt(document.getElementById('rPoints').value)||0;
     const image = document.getElementById('rImage').value.trim();
     const desc  = document.getElementById('rDesc').value.trim();
-    if (!title || !pts) return alert('กรุณากรอก ชื่อ และ แต้ม');
-    await addDoc(collection(db,'rewards'),{
-      title, points: pts, image, description: desc,
-      createdAt: new Date().toISOString()
-    });
-    ['rTitle','rPoints','rImage','rDesc'].forEach(id=>document.getElementById(id).value='');
-    window.showSection('rewards');
+    if (!title || !pts) return showToast('กรุณากรอก ชื่อ และ แต้ม', 'error');
+    
+    try {
+      const data = { title, points: pts, image, description: desc };
+      
+      if (editingRewardId) {
+        await updateDoc(doc(db, 'rewards', editingRewardId), data);
+        showToast('อัปเดตรางวัลสำเร็จ', 'success');
+      } else {
+        await addDoc(collection(db,'rewards'), { ...data, createdAt: new Date().toISOString() });
+        showToast('เพิ่มรางวัลสำเร็จ', 'success');
+      }
+      closeRewardModal();
+      window.showSection('rewards');
+    } catch (err) {
+      showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+    }
   };
 
-  window.addMission = async () => {
+  // Mission Modal Functions
+  window.openMissionModal = () => {
+    editingMissionId = null;
+    document.getElementById('missionModalTitle').textContent = '➕ เพิ่มภารกิจ';
+    ['mTitle','mPoints','mIcon','mDesc'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('missionModal').classList.remove('hidden');
+  };
+
+  window.closeMissionModal = () => {
+    document.getElementById('missionModal').classList.add('hidden');
+  };
+
+  window.editMission = async (id) => {
+    editingMissionId = id;
+    try {
+      const snap = await getDocs(collection(db, 'missions'));
+      const mission = snap.docs.find(d => d.id === id)?.data();
+      if (!mission) return showToast('ไม่พบภารกิจ', 'error');
+      
+      document.getElementById('missionModalTitle').textContent = '✏️ แก้ไขภารกิจ';
+      document.getElementById('mTitle').value = mission.title;
+      document.getElementById('mPoints').value = mission.points;
+      document.getElementById('mIcon').value = mission.icon;
+      document.getElementById('mDesc').value = mission.desc;
+      document.getElementById('missionModal').classList.remove('hidden');
+    } catch (err) {
+      showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+    }
+  };
+
+  window.saveMission = async () => {
     const title  = document.getElementById('mTitle').value.trim();
     const pts    = parseInt(document.getElementById('mPoints').value)||0;
     const icon   = document.getElementById('mIcon').value.trim();
     const desc   = document.getElementById('mDesc').value.trim();
-    if (!title || !pts) return alert('กรุณากรอก ชื่อ และ แต้ม');
-    await addDoc(collection(db,'missions'),{
-      title, points: pts, icon, desc,
-      createdAt: new Date().toISOString()
-    });
-    ['mTitle','mPoints','mIcon','mDesc'].forEach(id=>document.getElementById(id).value='');
-    window.showSection('missions');
+    if (!title || !pts) return showToast('กรุณากรอก ชื่อ และ แต้ม', 'error');
+    
+    try {
+      const data = { title, points: pts, icon, desc };
+      
+      if (editingMissionId) {
+        await updateDoc(doc(db, 'missions', editingMissionId), data);
+        showToast('อัปเดตภารกิจสำเร็จ', 'success');
+      } else {
+        await addDoc(collection(db,'missions'), { ...data, createdAt: new Date().toISOString() });
+        showToast('เพิ่มภารกิจสำเร็จ', 'success');
+      }
+      closeMissionModal();
+      window.showSection('missions');
+    } catch (err) {
+      showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+    }
   };
+
+  // Auto-load dashboard on page load
+  if (isAdmin) {
+    loadDashboard();
+  }
 </script>
 </body>
 </html>
