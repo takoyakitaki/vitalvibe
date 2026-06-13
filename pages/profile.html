@@ -98,8 +98,9 @@
     </div>
 
     <!-- Shipping Address Modal (hidden) -->
-    <div id="shippingModal" class="hidden fixed inset-0 bg-black/40 flex items-end z-50">
-      <div class="w-full max-w-md bg-white rounded-t-3xl p-5 pb-8 max-h-[90vh] overflow-y-auto">
+    <!-- ✅ ใหม่ — กึ่งกลางจอ ไม่จม -->
+    <div id="shippingModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-[999] px-4">
+      <div class="w-full max-w-md bg-white rounded-3xl p-5 pb-6 max-h-[85vh] overflow-y-auto shadow-2xl">
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-lg font-black text-gray-900">📦 ที่อยู่จัดส่ง</h3>
           <button onclick="closeShippingModal()" class="text-2xl text-gray-400">✕</button>
