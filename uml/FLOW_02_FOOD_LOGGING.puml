@@ -1,0 +1,69 @@
+@startuml VitalVibe_Food_Logging_Flow
+!theme plain
+skinparam backgroundColor #ffffff
+skinparam ArrowColor #10b981
+skinparam ActivityBorderColor #10b981
+skinparam ActivityBackgroundColor #f0fdf4
+
+title VitalVibe - Food Logging Flow (บันทึกการรับประทานอาหาร)
+
+actor User as user
+participant "Food Page\n(food.html)" as food_page
+participant "Camera/Upload\nModal" as camera
+participant "Gemini API\n(Google)" as gemini
+participant "Firestore\nDatabase" as firestore
+participant "Vercel API\n(/api/analyze-food)" as api
+
+user -> food_page: เข้าหน้า Food Logging
+activate food_page
+
+alt วิธีที่ 1: ถ่ายรูปอาหาร
+  user -> food_page: กดปุ่ม "📷 ถ่ายรูปอาหาร"
+  food_page -> camera: เปิด Camera Modal
+  activate camera
+  user -> camera: ถ่ายรูปอาหาร
+  camera -> camera: สร้าง File Blob
+  camera -> api: POST image + sessionToken
+  activate api
+  deactivate camera
+  
+  api -> gemini: ส่ง image ไป Analyze\n(GEMINI_API_KEY)
+  activate gemini
+  gemini -> gemini: Analyze: ชื่ออาหาร\nแคลอรี่ (cal)\nโปรตีน (g)\nคาร์บ (g)\nไขมัน (g)
+  gemini -> api: {"item": "ข้าวผัด",\n"calories": 450,\n"protein": 12, ...}
+  deactivate gemini
+  
+  api -> food_page: Return analysis result
+  deactivate api
+  
+  food_page -> food_page: แสดง analysis result\nให้ user ยืนยัน/แก้ไข
+  
+else วิธีที่ 2: บันทึกเอง (Manual)
+  user -> food_page: กดปุ่ม "✏️ บันทึกเอง"
+  food_page -> food_page: แสดง Form:\n- ชื่ออาหาร\n- แคลอรี่\n- โปรตีน, คาร์บ, ไขมัน
+  user -> food_page: กรอกข้อมูลลง Form
+end
+
+user -> food_page: กดปุ่ม "💾 บันทึก"
+food_page -> firestore: addDoc(collection:\n'foodLogs',\n{\n  uid: session.uid,\n  name: "ข้าวผัด",\n  calories: 450,\n  meal: "lunch",\n  date: today,\n  createdAt: now\n})
+activate firestore
+firestore -> firestore: Save to Firestore
+firestore -> food_page: Return docId
+deactivate firestore
+
+food_page -> food_page: Update UI:\n- เพิ่ม Log ไป MealSections\n- อัปเดต Calorie Bar\n- อัปเดต Total Calories
+
+alt Calories exceed Goal
+  food_page -> food_page: แสดง Alert:\n"⚠️ เกินเป้าหมายแล้ว!"
+end
+
+user -> food_page: ดู Calorie History\n(กดปุ่ม History)
+food_page -> firestore: query(collection: 'foodLogs',\nwhere uid = session.uid,\ndate = today)
+activate firestore
+firestore -> food_page: Return all today's logs
+deactivate firestore
+food_page -> food_page: แสดง logs เป็น List
+
+deactivate food_page
+
+@enduml

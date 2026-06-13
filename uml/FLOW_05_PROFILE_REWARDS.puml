@@ -1,0 +1,126 @@
+@startuml VitalVibe_Profile_Rewards_Flow
+!theme plain
+skinparam backgroundColor #ffffff
+skinparam ArrowColor #a855f7
+skinparam ActivityBorderColor #a855f7
+skinparam ActivityBackgroundColor #fdf4ff
+
+title VitalVibe - Profile & Rewards Flow (โปรไฟล์และรางวัล)
+
+actor User as user
+participant "Profile Page\n(profile.html)" as profile_page
+participant "Firestore\nDatabase" as firestore
+participant "Admin Panel" as admin
+
+== การจัดการโปรไฟล์ ==
+
+user -> profile_page: เข้าหน้า Profile
+activate profile_page
+
+profile_page -> firestore: ดึงข้อมูลผู้ใช้\nจาก users/{uid}
+activate firestore
+firestore -> profile_page: Return {\n  displayName,\n  email,\n  avatar,\n  points,\n  wallet,\n  calorieGoal\n}
+deactivate firestore
+
+profile_page -> profile_page: แสดง Profile Card:\n- Avatar (Emoji or Image)\n- ชื่อที่แสดง\n- Email\n- 🪙 Wallet (Points)\n- ⭐ Total Points
+
+user -> profile_page: กดที่ Avatar\nเพื่อเปลี่ยน
+profile_page -> profile_page: เปิด File Input\n(Image upload)
+
+user -> profile_page: เลือกรูปจาก\nGallery/Camera
+profile_page -> profile_page: สร้าง Blob\n& Preview image
+
+alt User ยืนยัน
+  profile_page -> profile_page: Compress/encode image
+  profile_page -> firestore: updateDoc(\n  'users/{uid}',\n  { avatar: base64String }\n)
+  activate firestore
+  firestore -> profile_page: Update success
+  deactivate firestore
+  profile_page -> profile_page: อัปเดต Avatar\nใน UI
+end
+
+user -> profile_page: กรอกแบบ Edit Profile:\n- ชื่อที่แสดง (displayName)\n- เป้าหมายแคลอรี่ต่อวัน
+  
+user -> profile_page: กดปุ่ม \"💾 บันทึกโปรไฟล์\"
+
+profile_page -> firestore: updateDoc(\n  'users/{uid}',\n  {\n    displayName: \"ชื่อใหม่\",\n    calorieGoal: 2200\n  }\n)
+activate firestore
+firestore -> profile_page: Update complete
+deactivate firestore
+
+profile_page -> profile_page: แสดง Success message\n✅ บันทึกแล้ว
+
+== ระบบ Rewards & Redemption ==
+
+profile_page -> profile_page: เลื่อนลงเพื่อดู\nRewards Section
+
+profile_page -> firestore: ดึง Rewards\nทั้งหมด\nจาก rewards collection
+activate firestore
+firestore -> profile_page: Return {\n  title,\n  description,\n  image,\n  pointsCost\n}
+deactivate firestore
+
+profile_page -> profile_page: แสดง Rewards Grid:\n[Card 1]\nชื่อรางวัล\nราคา: 500 pts\n[Card 2]\nชื่อรางวัล\nราคา: 1000 pts
+
+user -> profile_page: กดปุ่ม \"แลกรางวัล\"\nบน Reward Card
+
+alt User มี Points พอ\n(wallet >= pointsCost)
+  profile_page -> firestore: addDoc(\n    'redemptions',\n    {\n      uid: session.uid,\n      rewardId: 'reward-001',\n      rewardTitle: \"Starbucks\",\n      pointsCost: 500,\n      status: 'pending',\n      createdAt: now\n    }\n  )
+  activate firestore
+  firestore -> firestore: Create redemption\nrecord
+  
+  firestore -> firestore: UPDATE users/{uid}\ndecrement wallet by 500
+  
+  firestore -> profile_page: Redemption created
+  deactivate firestore
+  
+  profile_page -> profile_page: แสดง Success:\n\"✅ แลกรางวัลสำเร็จ!\"\n\"Admin จะติดต่อคุณเร็วๆนี้\"
+  
+  profile_page -> profile_page: เลื่อนไปส่วน\n\"Redemption History\"\nแสดง status: \"pending\"\n(รอ Admin ยืนยัน)
+  
+else User มี Points ไม่พอ
+  profile_page -> profile_page: แสดง Alert:\n\"❌ แต้มไม่พอ\"\n\"ต้องการ 500 pts แต่มี\"\nwalletAmount + \" pts\"\n\"ทำภารกิจเพิ่มเติม\"
+end
+
+== Admin ทำการ Manage Rewards ==
+
+admin -> admin: เข้า Admin Panel\nไปที่ Rewards section
+activate admin
+
+admin -> firestore: ดึง Rewards collection
+activate firestore
+firestore -> admin: Return all rewards
+deactivate firestore
+
+admin -> admin: แสดง Rewards Table\n(title, points, actions)
+
+alt Add New Reward
+  admin -> admin: กดปุ่ม \"➕ เพิ่มของรางวัล\"\n\nกรอก:\n- ชื่อรางวัล\n- แต้มที่ต้องใช้\n- emoji/icon\n- คำอธิบาย
+  
+  admin -> firestore: addDoc(\n    'rewards',\n    {\n      title: \"Starbucks Card\",\n      description: \"...\",\n      image: \"☕\",\n      pointsCost: 500\n    }\n  )
+  activate firestore
+  firestore -> admin: Reward created
+  deactivate firestore
+end
+
+admin -> admin: ไปที่ Redemptions\nดู requests ที่รอ
+
+admin -> firestore: ดึง Redemptions\nwhere status = 'pending'
+activate firestore
+firestore -> admin: Return pending\nredemption requests
+deactivate firestore
+
+admin -> admin: แสดง Redemptions Table\n(user, reward, date, status)
+
+alt Admin ยืนยัน Redemption\n(via Firestore Console)
+  admin -> firestore: UPDATE redemptions/{id}\nstatus = 'completed'
+  activate firestore
+  firestore -> firestore: Update status
+  deactivate firestore
+  
+  user -> profile_page: Refresh / Check Redemption\nStatus แสดง \"completed\" ✅
+end
+
+deactivate profile_page
+deactivate admin
+
+@enduml

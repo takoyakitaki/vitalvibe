@@ -1,0 +1,188 @@
+@startuml VitalVibe_Database_Schema
+!theme plain
+skinparam backgroundColor #ffffff
+skinparam classBackgroundColor #f0fdf4
+skinparam classBorderColor #14b8a6
+skinparam arrowColor #333333
+
+title VitalVibe - Firestore Database Schema (โครงสร้างฐานข้อมูล)
+
+together {
+  class users <<collection>> {
+    .. Primary Key ..
+    uid: string (document ID)
+    ---
+    .. Profile ..
+    displayName: string
+    email: string
+    avatar: string (base64 or URL)
+    createdAt: timestamp
+    ---
+    .. Gamification ..
+    points: number (lifetime points)
+    wallet: number (spendable points)
+    calorieGoal: number (daily kcal target)
+  }
+
+  class foodLogs <<collection>> {
+    .. Primary Key ..
+    id: string (auto-generated)
+    ---
+    .. Record Info ..
+    uid: string (owner)
+    createdAt: timestamp
+    date: date
+    ---
+    .. Food Data ..
+    name: string (food name)
+    calories: number
+    protein: number (grams)
+    carbs: number (grams)
+    fat: number (grams)
+    meal: string (breakfast/lunch/dinner/snack)
+    notes: string
+  }
+
+  class healthLogs <<collection>> {
+    .. Primary Key ..
+    id: string (auto-generated)
+    ---
+    .. Record Info ..
+    uid: string (owner)
+    createdAt: timestamp
+    date: date
+    type: string (weight/sugar/pressure)
+    ---
+    .. Type: weight ..
+    weight: number (kg)
+    ---
+    .. Type: sugar ..
+    sugar: number (mg/dL)
+    mealTiming: string (before/after)
+    ---
+    .. Type: pressure ..
+    systolic: number (ตัวบน)
+    diastolic: number (ตัวล่าง)
+  }
+}
+
+together {
+  class missions <<collection>> {
+    .. Primary Key ..
+    id: string (auto-generated)
+    ---
+    .. Mission Data ..
+    title: string (ชื่อภารกิจ)
+    description: string
+    icon: string (emoji)
+    points: number (reward points)
+    type: string (auto/manual)
+    target: number (threshold)
+    createdAt: timestamp
+    isActive: boolean
+  }
+
+  class missionCompletions <<collection>> {
+    .. Primary Key ..
+    id: string (auto-generated)
+    ---
+    .. Completion Record ..
+    uid: string (user who completed)
+    missionId: string (which mission)
+    points: number (awarded)
+    date: date
+    createdAt: timestamp
+  }
+
+  class leaderboard <<collection>> {
+    .. Primary Key ..
+    id: string (week_uid format)\n\"2026-w24-user123\"
+    ---
+    .. Leaderboard Data ..
+    week: string (2026-w24)
+    uid: string (user ID)
+    displayName: string (cached)
+    avatar: string (cached)
+    points: number (points this week)
+    rank: number (1, 2, 3, ...)
+    lastUpdated: timestamp
+  }
+}
+
+together {
+  class rewards <<collection>> {
+    .. Primary Key ..
+    id: string (auto-generated)
+    ---
+    .. Reward Data ..
+    title: string (รางวัล)
+    description: string
+    image: string (emoji or URL)
+    pointsCost: number (แต้มที่ต้องใช้)
+    isActive: boolean
+    createdAt: timestamp
+  }
+
+  class redemptions <<collection>> {
+    .. Primary Key ..
+    id: string (auto-generated)
+    ---
+    .. Redemption Record ..
+    uid: string (user requesting)
+    rewardId: string (which reward)
+    rewardTitle: string (cached)
+    pointsCost: number (points spent)
+    status: string (pending/completed/cancelled)
+    createdAt: timestamp
+    completedAt: timestamp (nullable)
+  }
+}
+
+together {
+  class reminders <<collection>> {
+    .. Primary Key ..
+    id: string (auto-generated)
+    ---
+    .. Reminder Data ..
+    uid: string (owner)
+    title: string (reminder text)
+    time: string (HH:MM format)
+    frequency: string (once/daily/weekly)
+    daysOfWeek: array (0-6 if weekly)
+    isActive: boolean
+    lastTriggered: timestamp
+    createdAt: timestamp
+  }
+
+  class notifications <<collection>> {
+    .. Primary Key ..
+    id: string (auto-generated)
+    ---
+    .. Notification ..
+    uid: string (recipient)
+    type: string (reminder/mission/reward/alert)
+    title: string
+    message: string
+    relatedId: string (missionId/rewardId)
+    isRead: boolean
+    createdAt: timestamp
+  }
+}
+
+' Relationships
+users --> foodLogs: "1 user has\nmany foodLogs\n(via uid)"
+users --> healthLogs: "1 user has\nmany healthLogs\n(via uid)"
+users --> missionCompletions: "1 user completes\nmany missions\n(via uid)"
+users --> leaderboard: "1 user in\nmany leaderboards\n(weekly)"
+users --> redemptions: "1 user makes\nmany redemptions\n(via uid)"
+users --> reminders: "1 user has\nmany reminders\n(via uid)"
+
+missions --> missionCompletions: "1 mission can be\ncompleted many times\n(via missionId)"
+
+rewards --> redemptions: "1 reward can be\nredeemed many times\n(via rewardId)"
+
+missions --> notifications: "mission completion\ntriggers notification"
+rewards --> notifications: "redemption status\ntriggers notification"
+reminders --> notifications: "reminder triggers\nnotification"
+
+@enduml

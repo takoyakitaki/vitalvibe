@@ -1,0 +1,122 @@
+@startuml VitalVibe_System_Overview
+!theme plain
+skinparam backgroundColor #ffffff
+skinparam ArrowColor #333333
+skinparam ComponentBackgroundColor #e1f5ff
+skinparam ComponentBorderColor #14b8a6
+
+title VitalVibe System Overview - ภาพรวมระบบ
+
+package "Users" #fff9e6 {
+  actor "👥 LINE Users\n(via Rich Menu)" as users
+}
+
+package "Frontend Layer - LIFF Web Apps" #f0fdf4 {
+  component "🔑 Login Page\nlogin.html" as login {
+    note right: • Email/Password Auth\n• Register New User\n• Session Management
+  }
+  
+  component "🍱 Food Page\npages/food.html" as food {
+    note right: • Photo Upload\n• Gemini Analysis\n• Manual Entry\n• Calorie Tracking\n• History View
+  }
+  
+  component "📋 Health Page\npages/health.html" as health {
+    note right: • Weight Logging\n• Sugar Tracking\n• Pressure Monitoring\n• History Filter
+  }
+  
+  component "🏆 Missions Page\npages/missions.html" as missions {
+    note right: • Mission List\n• Complete Tasks\n• Earn Points\n• Leaderboard\n• Weekly Ranking
+  }
+  
+  component "👤 Profile Page\npages/profile.html" as profile {
+    note right: • Edit Profile\n• Avatar Upload\n• View Points\n• Browse Rewards\n• Redeem Points
+  }
+  
+  component "⏰ Reminders Page\npages/reminders.html" as reminders {
+    note right: • Add Reminders\n• Schedule Times\n• Recurring Alerts
+  }
+}
+
+package "Admin Layer" #ffebee {
+  component "🛠️ Admin Panel\nadmin/index.html" as admin {
+    note right: • View All Data\n• Manage Missions\n• Manage Rewards\n• Approval System
+  }
+}
+
+package "Core Libraries" #e8f5e9 {
+  component "Auth Handler\nlib/auth.js" as auth_lib {
+    note right: • getSession()\n• saveSession()\n• requireAuth()
+  }
+  
+  component "Firebase Config\nlib/firebase.js" as firebase_lib {
+    note right: • Firebase Init\n• Auth & DB refs\n• LIFF IDs\n• Admin UIDs
+  }
+}
+
+package "Backend Services" #f3e5f5 {
+  database "🔐 Firebase Auth" as firebase_auth {
+    note right: Email/Password
+  }
+  
+  database "🗄️ Firestore DB" as firestore {
+    note right: • users\n• foodLogs\n• healthLogs\n• missions\n• rewards\n• leaderboard\n• redemptions
+  }
+}
+
+package "External APIs & Services" #ffe0b2 {
+  component "🤖 Gemini API\n(Food Analysis)" as gemini {
+    note right: Food Recognition\nCalorie Estimation
+  }
+  
+  component "📱 LINE Platform" as line {
+    note right: • Rich Menu\n• LIFF Links\n• Deep Linking
+  }
+  
+  component "🌐 Vercel\n(/api/analyze-food)" as vercel {
+    note right: Secure Gemini\nProxy Endpoint
+  }
+}
+
+' User Navigation
+users --> login: ผู้ใช้กดปุ่ม\nRich Menu
+users --> food: เข้า Food Page
+users --> health: เข้า Health Page
+users --> missions: เข้า Missions
+users --> profile: เข้า Profile
+
+' Page Flow
+login --> auth_lib: requireAuth()
+food --> auth_lib: requireAuth()
+health --> auth_lib: requireAuth()
+missions --> auth_lib: requireAuth()
+profile --> auth_lib: requireAuth()
+reminders --> auth_lib: requireAuth()
+
+' Backend Connections
+auth_lib --> firebase_lib: สั่ง Init
+firebase_lib --> firebase_auth: อ้างอิง
+firebase_lib --> firestore: อ้างอิง
+
+' Data Operations
+food --> firestore: Save foodLogs\nRead history
+health --> firestore: Save healthLogs\nRead history
+missions --> firestore: Load missions\nSave completions\nRead leaderboard
+profile --> firestore: Save profile\nSave redemptions\nRead wallet
+reminders --> firestore: Save reminders\nLoad reminders
+
+' External API Calls
+food --> vercel: Send image\nfor analysis
+vercel --> gemini: Call Gemini API\n(with secure key)
+
+' Admin Features
+admin --> firestore: CRUD All\nCollections
+admin --> firebase_auth: View users
+
+' LINE Integration
+line --> login: LIFF Deep Link
+line --> food: LIFF Deep Link
+line --> health: LIFF Deep Link
+line --> missions: LIFF Deep Link
+line --> profile: LIFF Deep Link
+
+@enduml

@@ -1,0 +1,96 @@
+@startuml VitalVibe_Missions_Gamification_Flow
+!theme plain
+skinparam backgroundColor #ffffff
+skinparam ArrowColor #f59e0b
+skinparam ActivityBorderColor #f59e0b
+skinparam ActivityBackgroundColor #fffbeb
+
+title VitalVibe - Missions & Gamification Flow (ภารกิจและระบบแต้ม)
+
+actor User as user
+participant "Missions Page\n(missions.html)" as missions_page
+participant "Food/Health Pages" as health_pages
+participant "Leaderboard\nSystem" as leaderboard
+participant "Firestore\nDatabase" as firestore
+participant "Admin Panel\n(admin/)" as admin
+
+== วงจรการทำภารกิจ ==
+
+user -> missions_page: เข้าหน้า Missions
+activate missions_page
+
+missions_page -> firestore: ดึงรายการ Missions\nทั้งหมด
+activate firestore
+firestore -> missions_page: Return missions collection
+deactivate firestore
+
+missions_page -> firestore: ดึง User's Current Points\nจากเอกสาร users/{uid}
+activate firestore
+firestore -> missions_page: Return { points, wallet }
+deactivate firestore
+
+missions_page -> missions_page: แสดง Mission List:\n- ชื่อภารกิจ\n- คำอธิบาย\n- แต้มที่ได้รับ\n- สถานะ (ทำแล้ว/ยังไม่ทำ)\n- ปุ่ม "ทำภารกิจ" หรือ "✓ สำเร็จ"
+
+user -> missions_page: ดูภารกิจและเข้าใจ\nเงื่อนไข
+missions_page -> missions_page: แสดง Mission Detail:\n\"บันทึกอาหาร 3 มื้อ\nในวันนี้ เพื่อได้ 50 แต้ม\"
+
+user -> health_pages: ไปเข้า Food Page\nเพื่อบันทึกอาหาร
+activate health_pages
+health_pages -> firestore: addDoc('foodLogs', {...})
+deactivate health_pages
+
+user -> missions_page: กลับมา Missions Page\nหลังทำภารกิจ
+
+user -> missions_page: กดปุ่ม\n\"ยืนยันว่าทำแล้ว\"\n(กรณี Manual Mission)
+missions_page -> firestore: addDoc(\n  'missionCompletions',\n  {\n    uid: session.uid,\n    missionId: 'mission-001',\n    points: 50,\n    date: now\n  }\n)
+activate firestore
+firestore -> firestore: Record mission completion
+firestore -> firestore: UPDATE users/{uid}\nincrement points by 50
+firestore -> missions_page: Success
+deactivate firestore
+
+missions_page -> missions_page: อัปเดต UI:\n- ซ่อน \"ทำภารกิจ\" button\n- แสดง \"✓ สำเร็จ\" badge\n- เพิ่ม Points counter\n- Animation celebration 🎉
+
+== ระบบ Leaderboard (รายสัปดาห์) ==
+
+missions_page -> firestore: ดึง Leaderboard\nสำหรับสัปดาห์นี้\nจาก leaderboard collection
+activate firestore
+firestore -> missions_page: Return top users\nของสัปดาห์นี้\n(rank, displayName,\npoints, avatar)
+deactivate firestore
+
+missions_page -> missions_page: แสดง Leaderboard UI:\n🥇 User 1 - 500 pts\n🥈 User 2 - 450 pts\n🥉 User 3 - 400 pts\n...\n👤 You - 250 pts (#15)
+
+alt Automatically update\nLeaderboard (Backend/Cron)
+  leaderboard -> firestore: ทุกสัปดาห์ query\n  all users + points\n  calculate rankings\n  save to leaderboard
+  activate firestore
+  firestore -> firestore: Reset leaderboard\nfor new week
+  deactivate firestore
+end
+
+== Admin ทำการสร้างภารกิจ ==
+
+admin -> admin: เข้า Admin Panel
+activate admin
+
+admin -> firestore: ดึง Missions collection\n(เพื่อแสดง current)
+activate firestore
+firestore -> admin: Return missions list
+deactivate firestore
+
+admin -> admin: กรอก Form:\n- Mission Title\n- Description\n- Points reward\n- Icon/Emoji\n- Mission Type (auto/manual)
+admin -> admin: กดปุ่ม \"บันทึก\"\n(\"Save Mission\")
+
+admin -> firestore: addDoc(\n  'missions',\n  {\n    title: \"บันทึก 3 มื้อ\",\n    desc: \"บันทึกอาหาร...\",\n    points: 50,\n    icon: \"🍱\",\n    type: \"manual\",\n    target: 3\n  }\n)
+activate firestore
+firestore -> firestore: Create mission document
+firestore -> admin: Success
+deactivate firestore
+
+admin -> admin: Mission List\nอัปเดตเพื่อแสดง\nmission ใหม่
+
+user -> missions_page: Refresh Missions Page\n(ปิด/เปิด)\nmission ใหม่ปรากฏ ✅
+
+deactivate missions_page
+deactivate admin
+
+@enduml
