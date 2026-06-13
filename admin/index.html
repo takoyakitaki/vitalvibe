@@ -224,60 +224,11 @@
         renderTable(section, docs);
       }
     } catch (err) {
-      const errorMsg = err.code === 'permission-denied' 
-        ? '🔒 Firestore Security Rules ไม่อนุญาต - ติดต่อผู้ดูแลระบบเพื่อตั้งค่า Rules'
-        : err.message;
-      el.innerHTML = `<p class="text-red-500 font-bold p-4">❌ เกิดข้อผิดพลาด: ${errorMsg}</p>`;
-      console.error('Dashboard error:', err);
+      el.innerHTML = `<p class="text-red-500 font-bold p-4">❌ เกิดข้อผิดพลาด: ${err.message}</p>`;
     }
   };
 
-  window.showSection = async (section) => {
-    if (!isAdmin) return;
-    currentSection = section;
-    document.querySelectorAll('.admin-tab').forEach(b=>b.className='admin-tab px-4 py-2 rounded-lg text-sm font-bold bg-gray-200 text-gray-600');
-    const activeTab = [...document.querySelectorAll('.admin-tab')]
-      .find(b => b.getAttribute('onclick') === `showSection('${section}')`);
-    if (activeTab) activeTab.className='admin-tab px-4 py-2 rounded-lg text-sm font-bold bg-blue-500 text-white';
-
-    if (section === 'dashboard') {
-      return await loadDashboard();
-    }
-
-    const el = document.getElementById('sectionContent');
-    el.innerHTML = '<p class="text-gray-400 text-sm animate-pulse">กำลังโหลด…</p>';
-
-    try {
-      const snap = await getDocs(collection(db, section));
-      const docs = snap.docs
-        .map(d=>({_id:d.id,...d.data()}))
-        .sort((a,b)=>String(b.createdAt || b.redeemedAt || '').localeCompare(String(a.createdAt || a.redeemedAt || '')));
-
-      if (!docs.length) {
-        el.innerHTML = `<p class="text-gray-400 text-sm p-4">ไม่มีข้อมูล</p>`;
-        if (section === 'rewards') {
-          el.innerHTML += `<button onclick="openRewardModal()" class="mt-4 bg-green-500 text-white text-sm font-bold px-4 py-2 rounded-lg">➕ เพิ่มรางวัล</button>`;
-        }
-        if (section === 'missions') {
-          el.innerHTML += `<button onclick="openMissionModal()" class="mt-4 bg-green-500 text-white text-sm font-bold px-4 py-2 rounded-lg">➕ เพิ่มภารกิจ</button>`;
-        }
-        return;
-      }
-
-      if (section === 'missions') {
-        renderMissions(docs);
-      } else if (section === 'rewards') {
-        renderRewards(docs);
-      } else {
-        renderTable(section, docs);
-      }
-    } catch (err) {
-      const errorMsg = err.code === 'permission-denied'
-        ? '🔒 Firestore Security Rules ไม่อนุญาต - ติดต่อผู้ดูแลระบบเพื่อตั้งค่า Rules'
-        : err.message;
-      el.innerHTML = `<p class="text-red-500 font-bold p-4">❌ เกิดข้อผิดพลาด: ${errorMsg}</p>`;
-      console.error(`Error loading ${section}:`, err);
-    }
+  const renderMissions = (missions) => {
     const el = document.getElementById('sectionContent');
     let html = `<div class="flex justify-between items-center mb-4">
       <p class="text-sm font-bold text-gray-600">${missions.length} ภารกิจ</p>
