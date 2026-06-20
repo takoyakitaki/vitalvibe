@@ -160,33 +160,6 @@
           </div>
         </div>
 
-        <!-- Access Control -->
-        <div class="mb-4 pb-4 border-b border-gray-100">
-          <p class="text-xs font-bold text-gray-700 mb-3">🔒 สิทธิ์การเข้าถึงข้อมูล</p>
-          <div class="space-y-2">
-            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded-xl transition">
-              <input type="checkbox" id="access_height" class="w-4 h-4 rounded" checked>
-              <span class="text-xs font-bold text-gray-700 flex-1">เปิดให้ดูส่วนสูง</span>
-              <span class="text-[10px] text-gray-400">👁️</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded-xl transition">
-              <input type="checkbox" id="access_weight" class="w-4 h-4 rounded" checked>
-              <span class="text-xs font-bold text-gray-700 flex-1">เปิดให้ดูน้ำหนัก</span>
-              <span class="text-[10px] text-gray-400">⚖️</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded-xl transition">
-              <input type="checkbox" id="access_waist_hip" class="w-4 h-4 rounded">
-              <span class="text-xs font-bold text-gray-700 flex-1">เปิดให้ดูรอบเอว/สะโพก</span>
-              <span class="text-[10px] text-gray-400">📏</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded-xl transition">
-              <input type="checkbox" id="access_bloodtest" class="w-4 h-4 rounded">
-              <span class="text-xs font-bold text-gray-700 flex-1">เปิดให้ดูผลตรวจเลือด</span>
-              <span class="text-[10px] text-gray-400">🩸</span>
-            </label>
-          </div>
-        </div>
-
         <!-- Save Button -->
         <button onclick="saveBodyStats()"
           class="w-full bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-black py-3 rounded-2xl text-sm active:scale-95 transition shadow-md">
@@ -365,15 +338,6 @@
       uid: uid
     };
 
-    // Collect access settings
-    const access = {
-      height: document.getElementById('access_height').checked,
-      weight: document.getElementById('access_weight').checked,
-      waist_hip: document.getElementById('access_waist_hip').checked,
-      bloodtest: document.getElementById('access_bloodtest').checked,
-      updatedAt: new Date().toISOString()
-    };
-
     // Validate at least one field
     const hasData = data.height || data.weight || data.waist || data.hip || 
                     data.muscle || data.bloodfat || data.bloodsugar || data.bloodpressure;
@@ -382,9 +346,6 @@
     try {
       // Save body stats record
       await addDoc(collection(db, 'bodyStats'), data);
-      
-      // Update user's access settings
-      await updateDoc(doc(db, 'users', uid), { bodyStatsAccess: access });
       
       alert('✅ บันทึกสถิติร่างกายสำเร็จ');
       loadBodyStats();
@@ -444,14 +405,6 @@
         if (latest.bloodpressure) document.getElementById('bs_bloodpressure').value = latest.bloodpressure;
       }
 
-      // Load access settings
-      const userDoc = await getDoc(doc(db, 'users', uid));
-      const access = userDoc.data()?.bodyStatsAccess || {};
-      
-      document.getElementById('access_height').checked = access.height !== false;
-      document.getElementById('access_weight').checked = access.weight !== false;
-      document.getElementById('access_waist_hip').checked = access.waist_hip || false;
-      document.getElementById('access_bloodtest').checked = access.bloodtest || false;
     } catch (err) {
       console.error('Error loading body stats:', err);
     }

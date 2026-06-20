@@ -389,10 +389,11 @@
           <div class="bg-white border border-gray-200 rounded-lg p-4">
             <h4 class="font-bold text-gray-800 mb-3">Users & Recording Access Rights</h4>
             <div class="space-y-2">
-              <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg font-bold text-sm text-gray-600">
+              <div class="grid grid-cols-1 md:grid-cols-[1.1fr_1.1fr_1fr_2fr_auto] gap-3 items-center bg-gray-50 p-3 rounded-lg font-bold text-sm text-gray-600">
                 <span>User</span>
                 <span>Email</span>
                 <span>Recording Enabled</span>
+                <span>Data Access</span>
                 <span>Action</span>
               </div>
       `;
@@ -402,16 +403,39 @@
       } else {
         users.forEach(user => {
           const recordingEnabled = user.healthRecordingEnabled !== false;
+          const access = user.bodyStatsAccess || {};
           html += `
-            <div class="flex items-center justify-between bg-white border border-gray-100 p-3 rounded-lg">
+            <div class="grid grid-cols-1 md:grid-cols-[1.1fr_1.1fr_1fr_2fr_auto] gap-3 items-center bg-white border border-gray-100 p-3 rounded-lg">
               <span class="font-bold text-gray-800">${user.displayName || 'Unknown'}</span>
-              <span class="text-sm text-gray-600">${user.email || '–'}</span>
+              <span class="text-sm text-gray-600">${user.email || user.lineUid || '–'}</span>
               <span class="flex items-center gap-2">
                 <input type="checkbox" id="rec_${user.id}" ${recordingEnabled ? 'checked' : ''} 
                   onchange="toggleHealthRecording('${user.id}', this.checked)"
                   class="w-4 h-4 rounded cursor-pointer">
                 <span class="text-xs ${recordingEnabled ? 'text-green-600 font-bold' : 'text-gray-400'}">${recordingEnabled ? '✓ Enabled' : '✗ Disabled'}</span>
               </span>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <label class="flex items-center gap-1 cursor-pointer">
+                  <input type="checkbox" ${access.height !== false ? 'checked' : ''}
+                    onchange="toggleBodyStatsAccess('${user.id}', 'height', this.checked)">
+                  <span>Height</span>
+                </label>
+                <label class="flex items-center gap-1 cursor-pointer">
+                  <input type="checkbox" ${access.weight !== false ? 'checked' : ''}
+                    onchange="toggleBodyStatsAccess('${user.id}', 'weight', this.checked)">
+                  <span>Weight</span>
+                </label>
+                <label class="flex items-center gap-1 cursor-pointer">
+                  <input type="checkbox" ${access.waist_hip ? 'checked' : ''}
+                    onchange="toggleBodyStatsAccess('${user.id}', 'waist_hip', this.checked)">
+                  <span>Waist/Hip</span>
+                </label>
+                <label class="flex items-center gap-1 cursor-pointer">
+                  <input type="checkbox" ${access.bloodtest ? 'checked' : ''}
+                    onchange="toggleBodyStatsAccess('${user.id}', 'bloodtest', this.checked)">
+                  <span>Blood</span>
+                </label>
+              </div>
               <button onclick="viewUserHealthStats('${user.id}')" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded">📊 Stats</button>
             </div>
           `;
@@ -448,6 +472,25 @@
       loadHealthRecording(); // Reload
     } catch (err) {
       showToast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+    }
+  };
+
+  window.toggleBodyStatsAccess = async (userId, key, enabled) => {
+    try {
+      const userRef = doc(db, 'users', userId);
+      const snap = await getDoc(userRef);
+      const current = snap.data()?.bodyStatsAccess || {};
+      await updateDoc(userRef, {
+        bodyStatsAccess: {
+          ...current,
+          [key]: enabled,
+          updatedAt: new Date().toISOString()
+        }
+      });
+      showToast('Updated health data permission', 'success');
+      loadHealthRecording();
+    } catch (err) {
+      showToast('Update failed: ' + err.message, 'error');
     }
   };
 

@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>VitalVibe – เข้าสู่ระบบ</title>
+  <title>VitalVibe - LINE Login</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     * { font-family: 'Prompt', sans-serif; }
@@ -15,209 +16,232 @@
       border: 1px solid rgba(255,255,255,0.1);
     }
     .btn-primary {
-      background: linear-gradient(135deg, #14b8a6, #10b981);
+      background: linear-gradient(135deg, #06c755, #14b8a6);
       transition: all .2s;
     }
     .btn-primary:active { transform: scale(0.97); opacity: .9; }
-    input:focus { outline: none; border-color: #14b8a6; }
-    .tab-active { background: linear-gradient(135deg,#14b8a6,#10b981); color:#fff; }
-    .tab-inactive { color: rgba(255,255,255,.5); }
+    input:focus { outline: none; border-color: #06c755; }
     @keyframes floatUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
     .float-up { animation: floatUp .5s ease-out forwards; }
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
 
-  <!-- Background blobs -->
   <div class="absolute inset-0 overflow-hidden pointer-events-none">
-    <div class="absolute -top-40 -left-40 w-96 h-96 rounded-full opacity-20" style="background:radial-gradient(circle,#14b8a6,transparent)"></div>
-    <div class="absolute -bottom-40 -right-40 w-96 h-96 rounded-full opacity-20" style="background:radial-gradient(circle,#10b981,transparent)"></div>
+    <div class="absolute -top-40 -left-40 w-96 h-96 rounded-full opacity-20" style="background:radial-gradient(circle,#06c755,transparent)"></div>
+    <div class="absolute -bottom-40 -right-40 w-96 h-96 rounded-full opacity-20" style="background:radial-gradient(circle,#14b8a6,transparent)"></div>
   </div>
 
   <div class="w-full max-w-sm float-up">
-
-    <!-- Logo -->
     <div class="text-center mb-8">
-      <div class="w-20 h-20 mx-auto rounded-3xl flex items-center justify-center text-4xl mb-3 shadow-2xl"
-           style="background:linear-gradient(135deg,#14b8a6,#10b981)">💚</div>
+      <div id="avatarPreview" class="w-20 h-20 mx-auto rounded-3xl flex items-center justify-center text-4xl mb-3 shadow-2xl overflow-hidden"
+           style="background:linear-gradient(135deg,#06c755,#14b8a6)">VV</div>
       <h1 class="text-3xl font-black text-white tracking-tight">VitalVibe</h1>
-      <p class="text-sm text-teal-400 font-semibold mt-1">สุขภาพดีเริ่มต้นที่นี่</p>
+      <p id="subtitle" class="text-sm text-emerald-400 font-semibold mt-1">Login with LINE</p>
     </div>
 
-    <!-- Card -->
     <div class="card-glass rounded-3xl p-6">
-
-      <!-- Tabs -->
-      <div class="flex bg-white/10 rounded-2xl p-1 mb-6">
-        <button id="tabLogin" onclick="switchTab('login')"
-          class="flex-1 py-2.5 rounded-xl text-sm font-bold tab-active transition-all">
-          เข้าสู่ระบบ
-        </button>
-        <button id="tabRegister" onclick="switchTab('register')"
-          class="flex-1 py-2.5 rounded-xl text-sm font-bold tab-inactive transition-all">
-          สมัครสมาชิก
-        </button>
+      <div id="statusView">
+        <div class="text-center py-4">
+          <div class="w-12 h-12 border-4 border-white/20 border-t-emerald-400 rounded-full animate-spin mx-auto mb-4"></div>
+          <p id="statusText" class="text-white font-bold text-sm">Checking LINE account...</p>
+          <p class="text-white/40 text-xs mt-2">Please open this page inside the LINE app.</p>
+        </div>
       </div>
 
-      <!-- Login Form -->
-      <div id="formLogin">
+      <div id="registerView" class="hidden">
+        <div class="mb-5">
+          <h2 class="text-white font-black text-xl">Register</h2>
+          <p class="text-white/45 text-xs mt-1">This LINE account is not registered yet.</p>
+        </div>
         <div class="space-y-3">
-          <input id="loginEmail" type="email" placeholder="อีเมล"
-            class="w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-white placeholder-white/40 text-sm transition-colors">
-          <div class="relative">
-            <input id="loginPassword" type="password" placeholder="รหัสผ่าน"
-              class="w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-white placeholder-white/40 text-sm transition-colors pr-12">
-            <button onclick="togglePass('loginPassword')" class="absolute right-4 top-3.5 text-white/40 text-lg">👁</button>
+          <div>
+            <label class="text-xs text-white/45 font-bold">Display name</label>
+            <input id="regName" type="text"
+              class="mt-1 w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-white placeholder-white/40 text-sm transition-colors">
+          </div>
+          <div>
+            <label class="text-xs text-white/45 font-bold">Email (optional)</label>
+            <input id="regEmail" type="email" placeholder="name@example.com"
+              class="mt-1 w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-white placeholder-white/40 text-sm transition-colors">
           </div>
         </div>
-        <button id="btnLogin"
-          class="btn-primary w-full mt-5 py-3.5 rounded-2xl text-white font-black text-sm shadow-lg">
-          เข้าสู่ระบบ
+        <button id="btnRegister" class="btn-primary w-full mt-5 py-3.5 rounded-2xl text-white font-black text-sm shadow-lg">
+          Create account
         </button>
       </div>
 
-      <!-- Register Form -->
-      <div id="formRegister" class="hidden">
-        <div class="space-y-3">
-          <input id="regName" type="text" placeholder="ชื่อที่แสดง"
-            class="w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-white placeholder-white/40 text-sm transition-colors">
-          <input id="regEmail" type="email" placeholder="อีเมล"
-            class="w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-white placeholder-white/40 text-sm transition-colors">
-          <div class="relative">
-            <input id="regPassword" type="password" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัว)"
-              class="w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-white placeholder-white/40 text-sm transition-colors pr-12">
-            <button onclick="togglePass('regPassword')" class="absolute right-4 top-3.5 text-white/40 text-lg">👁</button>
-          </div>
-        </div>
-        <button id="btnRegister"
-          class="btn-primary w-full mt-5 py-3.5 rounded-2xl text-white font-black text-sm shadow-lg">
-          สมัครสมาชิก
-        </button>
-      </div>
+      <button id="btnLineLogin" class="hidden btn-primary w-full py-3.5 rounded-2xl text-white font-black text-sm shadow-lg">
+        Login with LINE
+      </button>
 
-      <!-- Error / Status -->
       <div id="msgBox" class="hidden mt-4 p-3 rounded-2xl text-sm text-center font-semibold"></div>
-
     </div>
 
-    <!-- Footer note -->
-    <p class="text-center text-white/30 text-xs mt-6">
-      ระบบล็อกอินสำหรับ LINE OA · VitalVibe
-    </p>
+    <p class="text-center text-white/30 text-xs mt-6">VitalVibe for LINE Web App</p>
   </div>
 
-  <script>
-    // Define global functions BEFORE module loads (so onclick handlers work)
-    window.switchTab = (tab) => {
-      document.getElementById('formLogin').classList.toggle('hidden',    tab !== 'login');
-      document.getElementById('formRegister').classList.toggle('hidden', tab !== 'register');
-      document.getElementById('tabLogin').className    = `flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${tab==='login'    ? 'tab-active':'tab-inactive'}`;
-      document.getElementById('tabRegister').className = `flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${tab==='register' ? 'tab-active':'tab-inactive'}`;
-      hideMsg();
-    };
-
-    window.togglePass = (id) => {
-      const el = document.getElementById(id);
-      el.type = el.type === 'password' ? 'text' : 'password';
-    };
-
-    function showMsg(text, ok = false) {
-      const el = document.getElementById('msgBox');
-      el.textContent = text;
-      el.className = `mt-4 p-3 rounded-2xl text-sm text-center font-semibold ${ok ? 'bg-teal-500/20 text-teal-300' : 'bg-red-500/20 text-red-300'}`;
-      el.classList.remove('hidden');
-    }
-    function hideMsg() { document.getElementById('msgBox').classList.add('hidden'); }
-    window.showMsg = showMsg;
-    window.hideMsg = hideMsg;
-  </script>
-
   <script type="module">
-    import { auth, db } from './lib/firebase.js';
+    import { db, LIFF_IDS } from './lib/firebase.js';
     import { saveSession } from './lib/auth.js';
     import {
-      createUserWithEmailAndPassword,
-      signInWithEmailAndPassword,
-      updateProfile,
-    } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-    import { doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+      collection, doc, getDoc, getDocs, query, setDoc, where
+    } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
-    // Grab redirect target from query string
-    const params   = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(window.location.search);
     const requestedRedirect = params.get('redirect') || '/pages/food.html';
     const redirect = requestedRedirect.startsWith('/') && !requestedRedirect.startsWith('//')
       ? requestedRedirect
       : '/pages/food.html';
 
-    async function persistUser(user, displayName = '') {
-      // Upsert user doc in Firestore
-      const ref = doc(db, 'users', user.uid);
-      const snap = await getDoc(ref);
-      if (!snap.exists()) {
-        await setDoc(ref, {
-          uid:         user.uid,
-          displayName: displayName || user.displayName || 'ผู้ใช้',
-          email:       user.email,
-          avatar:      '',
-          points:      0,
-          wallet:      0,
-          createdAt:   new Date().toISOString(),
-        });
+    let lineProfile = null;
+
+    function showMsg(text, ok = false) {
+      const el = document.getElementById('msgBox');
+      el.textContent = text;
+      el.className = `mt-4 p-3 rounded-2xl text-sm text-center font-semibold ${ok ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300'}`;
+      el.classList.remove('hidden');
+    }
+
+    function setStatus(text) {
+      document.getElementById('statusText').textContent = text;
+    }
+
+    function renderProfile(profile) {
+      document.getElementById('subtitle').textContent = profile.displayName || 'LINE user';
+      if (profile.pictureUrl) {
+        document.getElementById('avatarPreview').innerHTML =
+          `<img src="${profile.pictureUrl}" class="w-full h-full object-cover" alt="">`;
       }
-      const data = snap.exists() ? snap.data() : { displayName, avatar: '', points: 0 };
+    }
+
+    function saveLineSession(userId, userData, profile) {
       saveSession({
-        uid:         user.uid,
-        displayName: data.displayName || displayName,
-        avatar:      data.avatar || '',
+        uid: userId,
+        displayName: userData.displayName || profile.displayName || 'LINE User',
+        avatar: userData.avatar || profile.pictureUrl || '',
+        lineUid: profile.userId,
       });
     }
-    
 
-    window.handleLogin = async () => {
-      const email = document.getElementById('loginEmail').value.trim();
-      const pass  = document.getElementById('loginPassword').value;
-      if (!email || !pass) return showMsg('กรุณากรอกข้อมูลให้ครบ');
-      try {
-        showMsg('กำลังเข้าสู่ระบบ…', true);
-        const cred = await signInWithEmailAndPassword(auth, email, pass);
-        await persistUser(cred.user, '');
-        window.location.href = redirect;
-      } catch (e) {
-        const msgs = {
-          'auth/user-not-found':  'ไม่พบบัญชีนี้',
-          'auth/wrong-password':  'รหัสผ่านไม่ถูกต้อง',
-          'auth/invalid-email':   'อีเมลไม่ถูกต้อง',
-          'auth/too-many-requests': 'ลองใหม่ภายหลัง (ลองเกินกำหนด)',
-        };
-        showMsg(msgs[e.code] || e.message);
+    async function findUserByLineId(lineUserId) {
+      const direct = await getDoc(doc(db, 'users', lineUserId));
+      if (direct.exists()) {
+        return { id: direct.id, data: direct.data() };
       }
-    };
 
-    window.handleRegister = async () => {
-      const name  = document.getElementById('regName').value.trim();
+      const byLineUid = await getDocs(query(collection(db, 'users'), where('lineUid', '==', lineUserId)));
+      if (!byLineUid.empty) {
+        const found = byLineUid.docs[0];
+        return { id: found.id, data: found.data() };
+      }
+
+      const byLineUserId = await getDocs(query(collection(db, 'users'), where('lineUserId', '==', lineUserId)));
+      if (!byLineUserId.empty) {
+        const found = byLineUserId.docs[0];
+        return { id: found.id, data: found.data() };
+      }
+
+      return null;
+    }
+
+    function showRegister(profile) {
+      document.getElementById('statusView').classList.add('hidden');
+      document.getElementById('registerView').classList.remove('hidden');
+      document.getElementById('regName').value = profile.displayName || '';
+      showMsg('Please register before using VitalVibe.', true);
+    }
+
+    async function continueWithLineProfile(profile) {
+      renderProfile(profile);
+      setStatus('Checking registration...');
+
+      const user = await findUserByLineId(profile.userId);
+      if (!user) {
+        lineProfile = profile;
+        showRegister(profile);
+        return;
+      }
+
+      saveLineSession(user.id, user.data, profile);
+      window.location.href = redirect;
+    }
+
+    async function startLineLogin() {
+      try {
+        if (!window.liff) {
+          throw new Error('LINE LIFF SDK is not available.');
+        }
+
+        setStatus('Connecting to LINE...');
+        await liff.init({ liffId: LIFF_IDS.login });
+
+        if (!liff.isLoggedIn()) {
+          if (liff.isInClient()) {
+            liff.login({ redirectUri: window.location.href });
+          } else {
+            document.getElementById('statusView').classList.add('hidden');
+            document.getElementById('btnLineLogin').classList.remove('hidden');
+          }
+          return;
+        }
+
+        const profile = await liff.getProfile();
+        await continueWithLineProfile(profile);
+      } catch (err) {
+        document.getElementById('btnLineLogin').classList.remove('hidden');
+        setStatus('Unable to check LINE account.');
+        showMsg(err.message || 'LINE login failed');
+      }
+    }
+
+    document.getElementById('btnLineLogin').addEventListener('click', async () => {
+      try {
+        await liff.init({ liffId: LIFF_IDS.login });
+        liff.login({ redirectUri: window.location.href });
+      } catch (err) {
+        showMsg(err.message || 'LINE login failed');
+      }
+    });
+
+    document.getElementById('btnRegister').addEventListener('click', async () => {
+      if (!lineProfile?.userId) return showMsg('LINE profile is missing. Please login again.');
+
+      const displayName = document.getElementById('regName').value.trim() || lineProfile.displayName || 'LINE User';
       const email = document.getElementById('regEmail').value.trim();
-      const pass  = document.getElementById('regPassword').value;
-      if (!name || !email || !pass) return showMsg('กรุณากรอกข้อมูลให้ครบ');
-      if (pass.length < 6)          return showMsg('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
-      try {
-        showMsg('กำลังสมัครสมาชิก…', true);
-        const cred = await createUserWithEmailAndPassword(auth, email, pass);
-        await updateProfile(cred.user, { displayName: name });
-        await persistUser(cred.user, name);
-        window.location.href = redirect;
-      } catch (e) {
-        const msgs = {
-          'auth/email-already-in-use': 'อีเมลนี้ถูกใช้แล้ว',
-          'auth/invalid-email':        'อีเมลไม่ถูกต้อง',
-          'auth/weak-password':        'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร',
-        };
-        showMsg(msgs[e.code] || e.message);
-      }
-    };
+      const userRef = doc(db, 'users', lineProfile.userId);
+      const now = new Date().toISOString();
 
-    // Attach event listeners after module loads
-    document.getElementById('btnLogin').addEventListener('click', window.handleLogin);
-    document.getElementById('btnRegister').addEventListener('click', window.handleRegister);
+      try {
+        await setDoc(userRef, {
+          uid: lineProfile.userId,
+          lineUid: lineProfile.userId,
+          lineUserId: lineProfile.userId,
+          displayName,
+          email,
+          avatar: lineProfile.pictureUrl || '',
+          points: 0,
+          wallet: 0,
+          calorieGoal: 2000,
+          bodyStatsAccess: {
+            height: true,
+            weight: true,
+            waist_hip: false,
+            bloodtest: false,
+            updatedAt: now,
+          },
+          createdAt: now,
+          updatedAt: now,
+        }, { merge: true });
+
+        saveLineSession(lineProfile.userId, { displayName, email, avatar: lineProfile.pictureUrl || '' }, lineProfile);
+        window.location.href = redirect;
+      } catch (err) {
+        showMsg(err.message || 'Register failed');
+      }
+    });
+
+    startLineLogin();
   </script>
 </body>
 </html>
