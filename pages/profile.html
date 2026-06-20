@@ -83,6 +83,118 @@
       </button>
     </div>
 
+    <!-- Body Statistics Section -->
+    <div class="bg-white border border-gray-100 rounded-3xl p-4 shadow-sm mb-5">
+      <div class="flex items-center justify-between mb-4 cursor-pointer" onclick="toggleBodyStats()">
+        <h3 class="font-black text-gray-800">📊 สถิติร่างกาย</h3>
+        <span id="bodyStatsToggleIcon" class="text-xl transition-transform">▼</span>
+      </div>
+      
+      <!-- Body Stats Collapsible Content -->
+      <div id="bodyStatsContent" class="hidden">
+        <!-- Current Stats Summary Card -->
+        <div id="bodyStatsSummary" class="bg-gradient-to-r from-emerald-400 to-teal-500 rounded-2xl p-4 text-white mb-4 shadow-md">
+          <p class="text-xs font-bold opacity-75 uppercase tracking-wider mb-2">สรุปสถิติล่าสุด</p>
+          <div class="grid grid-cols-2 gap-3">
+            <div id="statsHeight" class="text-sm"><span class="opacity-75">ส่วนสูง:</span> <span class="font-black">–</span></div>
+            <div id="statsWeight" class="text-sm"><span class="opacity-75">น้ำหนัก:</span> <span class="font-black">–</span></div>
+            <div id="statsWaist" class="text-sm"><span class="opacity-75">เอว:</span> <span class="font-black">–</span></div>
+            <div id="statsHip" class="text-sm"><span class="opacity-75">สะโพก:</span> <span class="font-black">–</span></div>
+          </div>
+        </div>
+
+        <!-- Body Stats Form -->
+        <div class="space-y-3 mb-4 pb-4 border-b border-gray-100">
+          <!-- Basic Measurements -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-gray-400 font-bold uppercase">ส่วนสูง (cm)</label>
+              <input id="bs_height" type="number" placeholder="170" step="0.1"
+                class="mt-1 w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold transition-colors">
+            </div>
+            <div>
+              <label class="text-xs text-gray-400 font-bold uppercase">น้ำหนัก (kg)</label>
+              <input id="bs_weight" type="number" placeholder="65" step="0.1"
+                class="mt-1 w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold transition-colors">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-gray-400 font-bold uppercase">รอบเอว (cm)</label>
+              <input id="bs_waist" type="number" placeholder="80" step="0.1"
+                class="mt-1 w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold transition-colors">
+            </div>
+            <div>
+              <label class="text-xs text-gray-400 font-bold uppercase">รอบสะโพก (cm)</label>
+              <input id="bs_hip" type="number" placeholder="95" step="0.1"
+                class="mt-1 w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold transition-colors">
+            </div>
+          </div>
+
+          <!-- Blood Test Results -->
+          <div class="pt-2 border-t border-gray-100 mt-3">
+            <p class="text-xs font-bold text-gray-700 mb-2">🩸 ผลตรวจเลือด</p>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-xs text-gray-400 font-bold">กล้ามเนื้อ (%)</label>
+                <input id="bs_muscle" type="number" placeholder="45" step="0.1"
+                  class="mt-1 w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold transition-colors">
+              </div>
+              <div>
+                <label class="text-xs text-gray-400 font-bold">ไขมันเลือด (mg/dL)</label>
+                <input id="bs_bloodfat" type="number" placeholder="180" step="0.1"
+                  class="mt-1 w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold transition-colors">
+              </div>
+              <div>
+                <label class="text-xs text-gray-400 font-bold">น้ำตาล (mg/dL)</label>
+                <input id="bs_bloodsugar" type="number" placeholder="100" step="0.1"
+                  class="mt-1 w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold transition-colors">
+              </div>
+              <div>
+                <label class="text-xs text-gray-400 font-bold">ความดัน (mmHg)</label>
+                <input id="bs_bloodpressure" type="text" placeholder="120/80"
+                  class="mt-1 w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold transition-colors">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Access Control -->
+        <div class="mb-4 pb-4 border-b border-gray-100">
+          <p class="text-xs font-bold text-gray-700 mb-3">🔒 สิทธิ์การเข้าถึงข้อมูล</p>
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded-xl transition">
+              <input type="checkbox" id="access_height" class="w-4 h-4 rounded" checked>
+              <span class="text-xs font-bold text-gray-700 flex-1">เปิดให้ดูส่วนสูง</span>
+              <span class="text-[10px] text-gray-400">👁️</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded-xl transition">
+              <input type="checkbox" id="access_weight" class="w-4 h-4 rounded" checked>
+              <span class="text-xs font-bold text-gray-700 flex-1">เปิดให้ดูน้ำหนัก</span>
+              <span class="text-[10px] text-gray-400">⚖️</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded-xl transition">
+              <input type="checkbox" id="access_waist_hip" class="w-4 h-4 rounded">
+              <span class="text-xs font-bold text-gray-700 flex-1">เปิดให้ดูรอบเอว/สะโพก</span>
+              <span class="text-[10px] text-gray-400">📏</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded-xl transition">
+              <input type="checkbox" id="access_bloodtest" class="w-4 h-4 rounded">
+              <span class="text-xs font-bold text-gray-700 flex-1">เปิดให้ดูผลตรวจเลือด</span>
+              <span class="text-[10px] text-gray-400">🩸</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Save Button -->
+        <button onclick="saveBodyStats()"
+          class="w-full bg-gradient-to-r from-emerald-400 to-teal-500 text-white font-black py-3 rounded-2xl text-sm active:scale-95 transition shadow-md">
+          💾 บันทึกสถิติร่างกาย
+        </button>
+      </div>
+    </div>
+
     <!-- Rewards -->
     <div class="mb-5">
       <div class="flex items-center justify-between mb-3">
@@ -232,6 +344,120 @@
     saveSession({ ...session, displayName: name });
     alert('บันทึกสำเร็จ ✅');
   };
+
+  // ── Body Statistics ────────────────────────────────────────
+  window.toggleBodyStats = () => {
+    const content = document.getElementById('bodyStatsContent');
+    const icon = document.getElementById('bodyStatsToggleIcon');
+    content.classList.toggle('hidden');
+    icon.style.transform = content.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+  };
+
+  window.saveBodyStats = async () => {
+    const data = {
+      height: parseFloat(document.getElementById('bs_height').value) || null,
+      weight: parseFloat(document.getElementById('bs_weight').value) || null,
+      waist: parseFloat(document.getElementById('bs_waist').value) || null,
+      hip: parseFloat(document.getElementById('bs_hip').value) || null,
+      muscle: parseFloat(document.getElementById('bs_muscle').value) || null,
+      bloodfat: parseFloat(document.getElementById('bs_bloodfat').value) || null,
+      bloodsugar: parseFloat(document.getElementById('bs_bloodsugar').value) || null,
+      bloodpressure: document.getElementById('bs_bloodpressure').value.trim() || null,
+      createdAt: new Date().toISOString(),
+      uid: uid
+    };
+
+    // Collect access settings
+    const access = {
+      height: document.getElementById('access_height').checked,
+      weight: document.getElementById('access_weight').checked,
+      waist_hip: document.getElementById('access_waist_hip').checked,
+      bloodtest: document.getElementById('access_bloodtest').checked,
+      updatedAt: new Date().toISOString()
+    };
+
+    // Validate at least one field
+    const hasData = data.height || data.weight || data.waist || data.hip || 
+                    data.muscle || data.bloodfat || data.bloodsugar || data.bloodpressure;
+    if (!hasData) return alert('กรุณากรอกข้อมูลอย่างน้อยหนึ่งฟิลด์');
+
+    try {
+      // Save body stats record
+      await addDoc(collection(db, 'bodyStats'), data);
+      
+      // Update user's access settings
+      await updateDoc(doc(db, 'users', uid), { bodyStatsAccess: access });
+      
+      alert('✅ บันทึกสถิติร่างกายสำเร็จ');
+      loadBodyStats();
+      
+      // Clear form
+      document.getElementById('bs_height').value = '';
+      document.getElementById('bs_weight').value = '';
+      document.getElementById('bs_waist').value = '';
+      document.getElementById('bs_hip').value = '';
+      document.getElementById('bs_muscle').value = '';
+      document.getElementById('bs_bloodfat').value = '';
+      document.getElementById('bs_bloodsugar').value = '';
+      document.getElementById('bs_bloodpressure').value = '';
+    } catch (err) {
+      alert('บันทึกไม่สำเร็จ: ' + err.message);
+    }
+  };
+
+  async function loadBodyStats() {
+    try {
+      // Get latest body stats
+      const q = query(
+        collection(db, 'bodyStats'),
+        where('uid', '==', uid),
+        orderBy('createdAt', 'desc')
+      );
+      const snap = await getDocs(q);
+      
+      if (!snap.empty) {
+        const latest = snap.docs[0].data();
+        
+        // Update summary display
+        document.getElementById('statsHeight').innerHTML = 
+          latest.height ? `<span class="opacity-75">ส่วนสูง:</span> <span class="font-black">${latest.height} cm</span>` 
+          : `<span class="opacity-75">ส่วนสูง:</span> <span class="font-black">–</span>`;
+        
+        document.getElementById('statsWeight').innerHTML = 
+          latest.weight ? `<span class="opacity-75">น้ำหนัก:</span> <span class="font-black">${latest.weight} kg</span>` 
+          : `<span class="opacity-75">น้ำหนัก:</span> <span class="font-black">–</span>`;
+        
+        document.getElementById('statsWaist').innerHTML = 
+          latest.waist ? `<span class="opacity-75">เอว:</span> <span class="font-black">${latest.waist} cm</span>` 
+          : `<span class="opacity-75">เอว:</span> <span class="font-black">–</span>`;
+        
+        document.getElementById('statsHip').innerHTML = 
+          latest.hip ? `<span class="opacity-75">สะโพก:</span> <span class="font-black">${latest.hip} cm</span>` 
+          : `<span class="opacity-75">สะโพก:</span> <span class="font-black">–</span>`;
+
+        // Pre-populate form with latest data
+        if (latest.height) document.getElementById('bs_height').value = latest.height;
+        if (latest.weight) document.getElementById('bs_weight').value = latest.weight;
+        if (latest.waist) document.getElementById('bs_waist').value = latest.waist;
+        if (latest.hip) document.getElementById('bs_hip').value = latest.hip;
+        if (latest.muscle) document.getElementById('bs_muscle').value = latest.muscle;
+        if (latest.bloodfat) document.getElementById('bs_bloodfat').value = latest.bloodfat;
+        if (latest.bloodsugar) document.getElementById('bs_bloodsugar').value = latest.bloodsugar;
+        if (latest.bloodpressure) document.getElementById('bs_bloodpressure').value = latest.bloodpressure;
+      }
+
+      // Load access settings
+      const userDoc = await getDoc(doc(db, 'users', uid));
+      const access = userDoc.data()?.bodyStatsAccess || {};
+      
+      document.getElementById('access_height').checked = access.height !== false;
+      document.getElementById('access_weight').checked = access.weight !== false;
+      document.getElementById('access_waist_hip').checked = access.waist_hip || false;
+      document.getElementById('access_bloodtest').checked = access.bloodtest || false;
+    } catch (err) {
+      console.error('Error loading body stats:', err);
+    }
+  }
 
   // ── Rewards ────────────────────────────────────────────────
   async function loadRewards() {
@@ -426,6 +652,7 @@
 
   loadRewards();
   loadRedemptionHistory();
+  loadBodyStats();
 </script>
 </body>
 </html>

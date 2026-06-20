@@ -6,7 +6,7 @@
   <title>VitalVibe – สุขภาพ</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
+
   <style>
     * { font-family:'Prompt',sans-serif; -webkit-tap-highlight-color:transparent; }
     body { background:#f0f9ff; }
@@ -29,7 +29,13 @@
   <!-- Header -->
   <div class="flex-shrink-0 pt-12 pb-4 px-5 bg-white border-b border-gray-100">
     <!-- <p class="text-xs text-gray-400 font-semibold uppercase tracking-widest">VitalVibe</p> -->
-    <h1 class="text-2xl font-black text-gray-900">📋 บันทึกสุขภาพ</h1>
+    <div class="flex items-center justify-between mb-2">
+      <h1 class="text-2xl font-black text-gray-900">📋 บันทึกสุขภาพ</h1>
+      <a href="/pages/profile.html" class="text-[10px] bg-emerald-100 text-emerald-700 font-black px-2.5 py-1.5 rounded-full hover:bg-emerald-200 transition">
+        📊 สถิติร่างกาย →
+      </a>
+    </div>
+    <p class="text-[11px] text-gray-400 font-semibold">ติดตามค่าสุขภาพประจำวัน</p>
 
     <!-- Type selector tabs -->
     <div class="flex gap-2 mt-4 overflow-x-auto hide-scrollbar pb-1">
