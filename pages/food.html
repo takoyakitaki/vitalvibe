@@ -2,8 +2,8 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title> บันทึกอาหาร</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>บันทึกอาหาร</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
@@ -17,9 +17,6 @@
     .analyzing{animation:pulse 1s ease-in-out infinite}
     html, body { height: 100%; height: 100dvh; width: 100%; }
     body { margin: 0; padding: 0; }
-    @supports (padding: max(0px)) {
-      body { padding: 0; }
-    }
   </style>
 </head>
 <body class="h-screen w-screen overflow-hidden">
@@ -29,7 +26,6 @@
   <div class="flex-shrink-0 pt-12 pb-4 px-5 bg-white border-b border-gray-100">
     <div class="flex items-center justify-between">
       <div>
-        <!-- <p class="text-xs text-gray-400 font-semibold uppercase tracking-widest">VitalVibe</p> -->
         <h1 class="text-2xl font-black text-gray-900">🍱 บันทึกการรับประทานอาหาร</h1>
       </div>
       <div id="userAvatar" class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-xl cursor-pointer"></div>
@@ -47,7 +43,6 @@
           <p class="text-3xl font-black" id="todayCalories">0</p>
         </div>
         <div class="text-right">
-          <!-- <p class="text-xs opacity-75">เป้าหมาย</p> -->
           <p class="text-lg font-bold" id="calorieGoal">2,000 kcal</p>
         </div>
       </div>
@@ -59,119 +54,111 @@
   </div>
 
   <!-- Scroll area -->
-  <div class="flex-1 overflow-y-auto hide-scrollbar px-5 pt-4" id="scrollArea" style="padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px) + 7.5rem)">
+  <div class="flex-1 overflow-y-auto hide-scrollbar px-5 pt-5 pb-4" id="scrollArea">
 
-    <!-- Add Food buttons -->
-    <div class="grid grid-cols-2 gap-3 mb-5">
-      <button onclick="openCamera()"
-        class="flex flex-col items-center justify-center bg-gradient-to-br from-teal-400 to-emerald-500 rounded-3xl p-5 text-white shadow-lg active:scale-95 transition">
-        <span class="text-3xl mb-1">📷</span>
-        <span class="font-black text-sm">ถ่ายรูปอาหาร</span>
-        <span class="text-[10px] opacity-75 mt-0.5">Gemini วิเคราะห์</span>
-      </button>
-      <button onclick="openManual()"
-        class="flex flex-col items-center justify-center bg-white border-2 border-dashed border-teal-300 rounded-3xl p-5 text-teal-600 active:scale-95 transition">
-        <span class="text-3xl mb-1">✏️</span>
-        <span class="font-black text-sm">บันทึกเอง</span>
-        <span class="text-[10px] opacity-75 mt-0.5">ระบุแคลอรี่</span>
-      </button>
-    </div>
+    <!-- ✅ ปุ่มเดียว — เต็มจอ โดดเด่น -->
+    <button onclick="openCamera()"
+      class="w-full flex items-center gap-4 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-3xl p-5 text-white shadow-lg active:scale-[0.98] transition mb-6">
+      <div class="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-4xl flex-shrink-0">📷</div>
+      <div class="text-left flex-1">
+        <span class="font-black text-lg block">ถ่ายรูปอาหาร</span>
+        <span class="text-sm opacity-75">Gemini จะวิเคราะห์แคลอรีและสารอาหารให้</span>
+      </div>
+      <span class="text-2xl opacity-50 flex-shrink-0">›</span>
+    </button>
 
     <!-- Meal sections -->
     <div id="mealSections" class="space-y-4"></div>
 
-  </div><!-- /scroll -->
+  </div>
 
-  <!-- Bottom Nav -->
-  <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur border-t border-gray-100 flex items-center justify-around pb-safe z-50 shadow-2xl min-h-20">
-    <a href="food.html" class="nav-item active flex flex-col items-center py-2 px-2 gap-0.5 flex-1 justify-center">
-      <span class="text-xl">🍱</span><span class="text-[10px] font-bold">อาหาร</span></a>
-    <a href="reminders.html" class="nav-item flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400 flex-1 justify-center">
-      <span class="text-xl">⏰</span><span class="text-[10px] font-bold">เตือน</span></a>
-    <a href="missions.html" class="nav-item flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400 flex-1 justify-center">
-      <span class="text-xl">🏆</span><span class="text-[10px] font-bold">ภารกิจ</span></a>
-    <a href="profile.html" class="nav-item flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400 flex-1 justify-center">
-      <span class="text-xl">👤</span><span class="text-[10px] font-bold">โปรไฟล์</span></a>
+  <!-- Responsive nav -->
+  <nav class="flex-shrink-0 w-full bg-white/95 backdrop-blur border-t border-gray-100 flex items-center justify-around pb-safe z-50 shadow-2xl" style="min-height:calc(3.5rem + max(0.5rem, env(safe-area-inset-bottom, 0px)))">
+    <a href="food.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-teal-500 flex-1 justify-center"><span class="text-xl">🍱</span><span class="text-[10px] font-bold">อาหาร</span></a>
+    <a href="reminders.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400 flex-1 justify-center"><span class="text-xl">⏰</span><span class="text-[10px] font-bold">เตือน</span></a>
+    <a href="missions.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400 flex-1 justify-center"><span class="text-xl">🏆</span><span class="text-[10px] font-bold">ภารกิจ</span></a>
+    <a href="profile.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400 flex-1 justify-center"><span class="text-xl">👤</span><span class="text-[10px] font-bold">โปรไฟล์</span></a>
   </nav>
-  <style>.nav-item.active{color:#14b8a6}</style>
+</div>
 
-</div><!-- /app -->
-
-<!-- ─── Camera / Analyze Modal ─── -->
+<!-- Camera / Analyze Modal -->
 <div id="cameraModal" class="hidden fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-4">
-  <div class="w-full max-w-sm bg-white rounded-3xl overflow-hidden shadow-2xl">
-    <div class="bg-gradient-to-r from-teal-500 to-emerald-500 p-4 flex items-center gap-3">
+  <div class="w-full max-w-sm bg-white rounded-3xl overflow-hidden shadow-2xl max-h-[92vh] flex flex-col">
+    <div class="bg-gradient-to-r from-teal-500 to-emerald-500 p-4 flex items-center gap-3 flex-shrink-0">
       <button onclick="closeCameraModal()" class="text-white/70 hover:text-white text-xl">✕</button>
       <h2 class="text-white font-black text-lg flex-1 text-center">ถ่ายหรืออัปโหลดรูปอาหาร</h2>
     </div>
 
-    <!-- Preview / upload zone -->
-    <div id="uploadZone" class="m-4 border-2 border-dashed border-teal-300 rounded-2xl p-6 text-center cursor-pointer"
-         onclick="document.getElementById('fileInput').click()">
-      <span class="text-5xl">📷</span>
-      <p class="text-gray-500 font-semibold mt-2 text-sm">แตะเพื่อถ่ายรูป / เลือกรูป</p>
-    </div>
-    <img id="previewImg" class="hidden w-full max-h-64 object-contain px-4" />
-    <input id="fileInput" type="file" accept="image/*" capture="environment" class="hidden" onchange="onFileSelected(event)">
+    <div class="flex-1 overflow-y-auto hide-scrollbar">
+      <!-- Upload zone -->
+      <div id="uploadZone" class="m-4 border-2 border-dashed border-teal-300 rounded-2xl p-6 text-center cursor-pointer"
+           onclick="document.getElementById('fileInput').click()">
+        <span class="text-5xl">📷</span>
+        <p class="text-gray-500 font-semibold mt-2 text-sm">แตะเพื่อถ่ายรูป / เลือกรูป</p>
+      </div>
+      <img id="previewImg" class="hidden w-full max-h-64 object-contain px-4" />
+      <input id="fileInput" type="file" accept="image/*" capture="environment" class="hidden" onchange="onFileSelected(event)">
 
-    <!-- Meal type -->
-    <div class="px-4 pb-2">
-      <p class="text-xs text-gray-500 font-bold mb-2">มื้ออาหาร</p>
-      <div class="flex gap-2">
-        <button data-meal="เช้า"    onclick="selectMeal(this)" class="meal-btn flex-1 py-2 rounded-xl text-xs font-bold border-2 border-teal-400 bg-teal-50 text-teal-600">🌅 เช้า</button>
-        <button data-meal="กลางวัน" onclick="selectMeal(this)" class="meal-btn flex-1 py-2 rounded-xl text-xs font-bold border-2 border-gray-200 text-gray-500">☀️ กลาง</button>
-        <button data-meal="เย็น"    onclick="selectMeal(this)" class="meal-btn flex-1 py-2 rounded-xl text-xs font-bold border-2 border-gray-200 text-gray-500">🌙 เย็น</button>
-        <button data-meal="ว่าง"    onclick="selectMeal(this)" class="meal-btn flex-1 py-2 rounded-xl text-xs font-bold border-2 border-gray-200 text-gray-500">🍎 ว่าง</button>
+      <!-- Meal type -->
+      <div class="px-4 pb-2">
+        <p class="text-xs text-gray-500 font-bold mb-2">มื้ออาหาร</p>
+        <div class="flex gap-2">
+          <button data-meal="เช้า"    onclick="selectMeal(this)" class="meal-btn flex-1 py-2 rounded-xl text-xs font-bold border-2 border-teal-400 bg-teal-50 text-teal-600">🌅 เช้า</button>
+          <button data-meal="กลางวัน" onclick="selectMeal(this)" class="meal-btn flex-1 py-2 rounded-xl text-xs font-bold border-2 border-gray-200 text-gray-500">☀️ กลาง</button>
+          <button data-meal="เย็น"    onclick="selectMeal(this)" class="meal-btn flex-1 py-2 rounded-xl text-xs font-bold border-2 border-gray-200 text-gray-500">🌙 เย็น</button>
+          <button data-meal="ว่าง"    onclick="selectMeal(this)" class="meal-btn flex-1 py-2 rounded-xl text-xs font-bold border-2 border-gray-200 text-gray-500">🍎 ว่าง</button>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div id="analyzeStatus" class="hidden px-4 py-3 mx-4 mb-2 rounded-2xl bg-teal-50 text-teal-700 text-sm font-semibold text-center"></div>
+
+      <!-- Result -->
+      <div id="analyzeResult" class="hidden px-4 pb-2 space-y-2">
+        <div class="bg-gray-50 rounded-2xl p-3">
+          <p class="text-xs text-gray-400 font-bold mb-1">ชื่ออาหาร (แก้ไขได้)</p>
+          <input id="foodName" class="w-full bg-transparent font-bold text-gray-800 text-sm outline-none border-b border-gray-200 pb-1">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="bg-orange-50 rounded-2xl p-3 text-center">
+            <p class="text-[10px] text-orange-400 font-bold mb-1">แคลอรี่</p>
+            <input id="foodCalories" type="number" class="w-full bg-transparent font-black text-orange-600 text-xl text-center outline-none">
+            <p class="text-[10px] text-orange-400">kcal</p>
+          </div>
+          <div class="bg-blue-50 rounded-2xl p-3 text-center">
+            <p class="text-[10px] text-blue-400 font-bold mb-1">โปรตีน</p>
+            <input id="foodProtein" type="number" class="w-full bg-transparent font-black text-blue-600 text-xl text-center outline-none">
+            <p class="text-[10px] text-blue-400">g</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-4 gap-2">
+          <div class="bg-emerald-50 rounded-2xl p-2 text-center">
+            <p class="text-[10px] text-emerald-500 font-bold mb-1">Carb</p>
+            <input id="foodCarbs" type="number" class="w-full bg-transparent font-black text-emerald-600 text-sm text-center outline-none">
+            <p class="text-[10px] text-emerald-400">g</p>
+          </div>
+          <div class="bg-amber-50 rounded-2xl p-2 text-center">
+            <p class="text-[10px] text-amber-500 font-bold mb-1">Fat</p>
+            <input id="foodFat" type="number" class="w-full bg-transparent font-black text-amber-600 text-sm text-center outline-none">
+            <p class="text-[10px] text-amber-400">g</p>
+          </div>
+          <div class="bg-lime-50 rounded-2xl p-2 text-center">
+            <p class="text-[10px] text-lime-500 font-bold mb-1">Fiber</p>
+            <input id="foodFiber" type="number" class="w-full bg-transparent font-black text-lime-600 text-sm text-center outline-none">
+            <p class="text-[10px] text-lime-400">g</p>
+          </div>
+          <div class="bg-rose-50 rounded-2xl p-2 text-center">
+            <p class="text-[10px] text-rose-500 font-bold mb-1">Na</p>
+            <input id="foodSodium" type="number" class="w-full bg-transparent font-black text-rose-600 text-sm text-center outline-none">
+            <p class="text-[10px] text-rose-400">mg</p>
+          </div>
+        </div>
+        <p id="foodNote" class="text-xs text-gray-400 italic px-1"></p>
       </div>
     </div>
 
-    <!-- Status -->
-    <div id="analyzeStatus" class="hidden px-4 py-3 mx-4 mb-2 rounded-2xl bg-teal-50 text-teal-700 text-sm font-semibold text-center"></div>
-
-    <!-- Result -->
-    <div id="analyzeResult" class="hidden px-4 pb-2 space-y-2">
-      <div class="bg-gray-50 rounded-2xl p-3">
-        <p class="text-xs text-gray-400 font-bold mb-1">ชื่ออาหาร (แก้ไขได้)</p>
-        <input id="foodName" class="w-full bg-transparent font-bold text-gray-800 text-sm outline-none border-b border-gray-200 pb-1">
-      </div>
-      <div class="grid grid-cols-2 gap-2">
-        <div class="bg-orange-50 rounded-2xl p-3 text-center">
-          <p class="text-[10px] text-orange-400 font-bold mb-1">แคลอรี่</p>
-          <input id="foodCalories" type="number" class="w-full bg-transparent font-black text-orange-600 text-xl text-center outline-none">
-          <p class="text-[10px] text-orange-400">kcal</p>
-        </div>
-        <div class="bg-blue-50 rounded-2xl p-3 text-center">
-          <p class="text-[10px] text-blue-400 font-bold mb-1">โปรตีน</p>
-          <input id="foodProtein" type="number" class="w-full bg-transparent font-black text-blue-600 text-xl text-center outline-none">
-          <p class="text-[10px] text-blue-400">g</p>
-        </div>
-      </div>
-      <div class="grid grid-cols-4 gap-2">
-        <div class="bg-emerald-50 rounded-2xl p-2 text-center">
-          <p class="text-[10px] text-emerald-500 font-bold mb-1">Carb</p>
-          <input id="foodCarbs" type="number" class="w-full bg-transparent font-black text-emerald-600 text-sm text-center outline-none">
-          <p class="text-[10px] text-emerald-400">g</p>
-        </div>
-        <div class="bg-amber-50 rounded-2xl p-2 text-center">
-          <p class="text-[10px] text-amber-500 font-bold mb-1">Fat</p>
-          <input id="foodFat" type="number" class="w-full bg-transparent font-black text-amber-600 text-sm text-center outline-none">
-          <p class="text-[10px] text-amber-400">g</p>
-        </div>
-        <div class="bg-lime-50 rounded-2xl p-2 text-center">
-          <p class="text-[10px] text-lime-500 font-bold mb-1">Fiber</p>
-          <input id="foodFiber" type="number" class="w-full bg-transparent font-black text-lime-600 text-sm text-center outline-none">
-          <p class="text-[10px] text-lime-400">g</p>
-        </div>
-        <div class="bg-rose-50 rounded-2xl p-2 text-center">
-          <p class="text-[10px] text-rose-500 font-bold mb-1">Na</p>
-          <input id="foodSodium" type="number" class="w-full bg-transparent font-black text-rose-600 text-sm text-center outline-none">
-          <p class="text-[10px] text-rose-400">mg</p>
-        </div>
-      </div>
-      <p id="foodNote" class="text-xs text-gray-400 italic px-1"></p>
-    </div>
-
-    <div class="p-4 flex gap-2">
+    <!-- ปุ่มด้านล่าง modal -->
+    <div class="p-4 flex gap-2 flex-shrink-0 pb-safe">
       <button id="analyzeBtn" onclick="analyzeFood()" disabled
         class="flex-1 bg-gradient-to-r from-teal-400 to-emerald-500 text-white font-black py-3 rounded-2xl text-sm disabled:opacity-40 transition active:scale-95">
         🔍 วิเคราะห์
@@ -183,72 +170,11 @@
   </div>
 </div>
 
-<!-- ─── Manual Entry Modal ─── -->
-<div id="manualModal" class="hidden fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center p-4">
-  <div class="w-full max-w-sm bg-white rounded-3xl overflow-hidden shadow-2xl">
-    <div class="bg-gradient-to-r from-teal-500 to-emerald-500 p-4 flex items-center gap-3">
-      <button onclick="document.getElementById('manualModal').classList.add('hidden')" class="text-white/70 text-xl">✕</button>
-      <h2 class="text-white font-black text-lg flex-1 text-center">บันทึกอาหารเอง</h2>
-    </div>
-    <div class="p-4 space-y-3">
-      <input id="mFoodName" placeholder="ชื่ออาหาร เช่น ข้าวมันไก่"
-        class="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm font-semibold outline-none focus:border-teal-400">
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label class="text-[10px] text-gray-400 font-bold uppercase">แคลอรี่ (kcal)</label>
-          <input id="mCalories" type="number" placeholder="500"
-            class="w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold outline-none focus:border-teal-400 mt-1">
-        </div>
-        <div>
-          <label class="text-[10px] text-gray-400 font-bold uppercase">โปรตีน (g)</label>
-          <input id="mProtein" type="number" placeholder="20"
-            class="w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold outline-none focus:border-teal-400 mt-1">
-        </div>
-      </div>
-      <details class="bg-gray-50 rounded-2xl p-3">
-        <summary class="text-xs font-black text-gray-500 cursor-pointer">สารอาหารเพิ่มเติม</summary>
-        <div class="grid grid-cols-2 gap-2 mt-3">
-          <div>
-            <label class="text-[10px] text-gray-400 font-bold uppercase">คาร์โบไฮเดรต (g)</label>
-            <input id="mCarbs" type="number" placeholder="0"
-              class="w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold outline-none focus:border-teal-400 mt-1">
-          </div>
-          <div>
-            <label class="text-[10px] text-gray-400 font-bold uppercase">ไขมัน (g)</label>
-            <input id="mFat" type="number" placeholder="0"
-              class="w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold outline-none focus:border-teal-400 mt-1">
-          </div>
-          <div>
-            <label class="text-[10px] text-gray-400 font-bold uppercase">ใยอาหาร (g)</label>
-            <input id="mFiber" type="number" placeholder="0"
-              class="w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold outline-none focus:border-teal-400 mt-1">
-          </div>
-          <div>
-            <label class="text-[10px] text-gray-400 font-bold uppercase">โซเดียม (mg)</label>
-            <input id="mSodium" type="number" placeholder="0"
-              class="w-full border border-gray-200 rounded-2xl px-4 py-2.5 text-sm font-bold outline-none focus:border-teal-400 mt-1">
-          </div>
-        </div>
-      </details>
-      <div class="flex gap-2">
-        <button data-meal="เช้า"    onclick="selectMealM(this)" class="meal-btn-m flex-1 py-2 rounded-xl text-xs font-bold border-2 border-teal-400 bg-teal-50 text-teal-600">🌅 เช้า</button>
-        <button data-meal="กลางวัน" onclick="selectMealM(this)" class="meal-btn-m flex-1 py-2 rounded-xl text-xs font-bold border-2 border-gray-200 text-gray-500">☀️ กลาง</button>
-        <button data-meal="เย็น"    onclick="selectMealM(this)" class="meal-btn-m flex-1 py-2 rounded-xl text-xs font-bold border-2 border-gray-200 text-gray-500">🌙 เย็น</button>
-        <button data-meal="ว่าง"    onclick="selectMealM(this)" class="meal-btn-m flex-1 py-2 rounded-xl text-xs font-bold border-2 border-gray-200 text-gray-500">🍎 ว่าง</button>
-      </div>
-      <button onclick="saveManualEntry()"
-        class="w-full bg-gradient-to-r from-teal-400 to-emerald-500 text-white font-black py-3 rounded-2xl text-sm active:scale-95 transition">
-        💾 บันทึก
-      </button>
-    </div>
-  </div>
-</div>
-
 <!-- Calorie History Modal -->
 <div id="calorieHistoryModal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-  <div class="w-full max-w-sm max-h-[86vh] bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col">
-    <div class="bg-gradient-to-r from-teal-500 to-emerald-500 p-4 flex items-center gap-3">
-      <button onclick="closeCalorieHistory()" class="text-white/70 hover:text-white text-xl">x</button>
+  <div class="w-full max-w-sm max-h-[88vh] bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+    <div class="bg-gradient-to-r from-teal-500 to-emerald-500 p-4 flex items-center gap-3 flex-shrink-0">
+      <button onclick="closeCalorieHistory()" class="text-white/70 hover:text-white text-xl">✕</button>
       <h2 class="text-white font-black text-lg flex-1 text-center">ประวัติแคลอรี่</h2>
     </div>
     <div class="p-4 flex-1 overflow-y-auto hide-scrollbar">
@@ -276,17 +202,15 @@
   const uid = session.uid;
   document.getElementById('userAvatar').textContent = session.avatar || '👦🏻';
 
-  // ── State ──────────────────────────────────────────────────
-  let selectedMeal  = 'เช้า';
-  let selectedMealM = 'เช้า';
-  let selectedFile  = null;
-  let selectedB64   = null;
+  let selectedMeal = 'เช้า';
+  let selectedFile = null;
+  let selectedB64 = null;
   let calorieGoal = 2000;
   let lineUserId = session.lineUid || null;
   let latestTodayEntries = [];
   let historyEntries = [];
 
-  onSnapshot(doc(db,'users',uid), snap => {
+  onSnapshot(doc(db, 'users', uid), snap => {
     const profile = snap.data() || {};
     calorieGoal = Number(profile.calorieGoal) || 2000;
     lineUserId = profile.lineUserId || profile.lineUid || session.lineUid || null;
@@ -294,17 +218,12 @@
     updateSummary(latestTodayEntries);
   }, err => console.error('User profile listener failed:', err));
 
-  // ── Realtime listener ──────────────────────────────────────
   const today = formatLocalDate(new Date());
-  const q = query(
-    collection(db,'foodLogs'),
-    where('uid','==',uid),
-    where('date','==',today)
-  );
+  const q = query(collection(db, 'foodLogs'), where('uid', '==', uid), where('date', '==', today));
   onSnapshot(q, snap => {
     const entries = snap.docs
-      .map(d=>({id:d.id,...d.data()}))
-      .sort((a,b)=>String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
     latestTodayEntries = entries;
     renderMeals(entries);
     updateSummary(entries);
@@ -315,10 +234,10 @@
   });
 
   function updateSummary(entries) {
-    const total = entries.reduce((s,e)=>s+(e.calories||0),0);
+    const total = entries.reduce((s, e) => s + (e.calories || 0), 0);
     document.getElementById('todayCalories').textContent = total.toLocaleString();
-    const pct = Math.min(100, (total/calorieGoal)*100);
-    document.getElementById('calorieBar').style.width = pct+'%';
+    const pct = Math.min(100, (total / calorieGoal) * 100);
+    document.getElementById('calorieBar').style.width = pct + '%';
     const alertEl = document.getElementById('calorieAlert');
     if (total >= calorieGoal && calorieGoal > 0) {
       alertEl.textContent = 'แคลอรี่วันนี้เต็มแล้ว';
@@ -333,12 +252,9 @@
   async function saveDailyCalorieSummary(total) {
     try {
       await setDoc(doc(db, 'dailyCalorieSummaries', `${uid}_${today}`), {
-        uid, date: today, calories: total, goal: calorieGoal,
-        updatedAt: new Date().toISOString()
+        uid, date: today, calories: total, goal: calorieGoal, updatedAt: new Date().toISOString()
       }, { merge: true });
-    } catch (err) {
-      console.warn('Daily calorie summary save failed:', err);
-    }
+    } catch (err) { console.warn('Daily summary save failed:', err); }
   }
 
   async function notifyCalorieGoalReached(total) {
@@ -346,40 +262,24 @@
     try {
       const notifySnap = await getDoc(notifyRef);
       if (notifySnap.exists()) return;
-      await setDoc(notifyRef, {
-        uid, date: today, calories: total, goal: calorieGoal,
-        status: lineUserId ? 'pending' : 'no_line_user',
-        createdAt: new Date().toISOString()
-      });
+      await setDoc(notifyRef, { uid, date: today, calories: total, goal: calorieGoal, status: lineUserId ? 'pending' : 'no_line_user', createdAt: new Date().toISOString() });
       if (!lineUserId) return;
-      const res = await fetch('/api/send-line-message', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          to: lineUserId,
-          text: `VitalVibe: แคลอรี่วันนี้เต็มแล้ว (${total.toLocaleString()} / ${calorieGoal.toLocaleString()} kcal)`
-        })
-      });
-      await updateDoc(notifyRef, {
-        status: res.ok ? 'sent' : 'failed',
-        notifiedAt: new Date().toISOString()
-      });
+      const res = await fetch('/api/send-line-message', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: lineUserId, text: `VitalVibe: แคลอรี่วันนี้เต็มแล้ว (${total.toLocaleString()} / ${calorieGoal.toLocaleString()} kcal)` }) });
+      await updateDoc(notifyRef, { status: res.ok ? 'sent' : 'failed', notifiedAt: new Date().toISOString() });
     } catch (err) {
       console.warn('Calorie LINE notification failed:', err);
-      try {
-        await setDoc(notifyRef, { status: 'failed', error: err.message, updatedAt: new Date().toISOString() }, { merge: true });
-      } catch (_) {}
+      try { await setDoc(notifyRef, { status: 'failed', error: err.message, updatedAt: new Date().toISOString() }, { merge: true }); } catch (_) {}
     }
   }
 
   function renderMeals(entries) {
-    const meals = ['เช้า','กลางวัน','เย็น','ว่าง'];
-    const icons = {เช้า:'🌅',กลางวัน:'☀️',เย็น:'🌙',ว่าง:'🍎'};
+    const meals = ['เช้า', 'กลางวัน', 'เย็น', 'ว่าง'];
+    const icons = { เช้า: '🌅', กลางวัน: '☀️', เย็น: '🌙', ว่าง: '🍎' };
     let html = '';
     meals.forEach(m => {
-      const items = entries.filter(e=>e.meal===m);
+      const items = entries.filter(e => e.meal === m);
       if (!items.length) return;
-      const subtotal = items.reduce((s,e)=>s+(e.calories||0),0);
+      const subtotal = items.reduce((s, e) => s + (e.calories || 0), 0);
       html += `<div class="fade-in">
         <div class="flex justify-between items-center mb-2">
           <h3 class="font-black text-gray-700">${icons[m]} มื้อ${m}</h3>
@@ -391,11 +291,11 @@
           <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-lg flex-shrink-0">🍽️</div>
           <div class="flex-1 min-w-0">
             <p class="font-bold text-gray-800 text-sm truncate">${e.name}</p>
-            <p class="text-xs text-gray-400">${e.calories||0} kcal${e.protein?` · ${e.protein}g โปรตีน`:''}</p>
-            <p class="text-[11px] text-gray-300">C ${e.carbs||0}g ยท F ${e.fat||0}g ยท Fiber ${e.fiber||0}g ยท Na ${e.sodium||0}mg</p>
+            <p class="text-xs text-gray-400">${e.calories || 0} kcal${e.protein ? ` · ${e.protein}g โปรตีน` : ''}</p>
+            <p class="text-[11px] text-gray-300">C ${e.carbs || 0}g · F ${e.fat || 0}g · Fiber ${e.fiber || 0}g · Na ${e.sodium || 0}mg</p>
             ${e.note ? `<p class="text-[11px] text-gray-400 truncate">${e.note}</p>` : ''}
           </div>
-          <button onclick="editEntry('${e.id}','${encodeURIComponent(e.name||'')}',${e.calories||0},${e.carbs||0},${e.protein||0},${e.fat||0},${e.fiber||0},${e.sodium||0},'${encodeURIComponent(e.note||'')}')" class="text-gray-300 hover:text-teal-500 transition text-sm font-black flex-shrink-0">แก้</button>
+          <button onclick="editEntry('${e.id}','${encodeURIComponent(e.name || '')}',${e.calories || 0},${e.carbs || 0},${e.protein || 0},${e.fat || 0},${e.fiber || 0},${e.sodium || 0},'${encodeURIComponent(e.note || '')}')" class="text-gray-300 hover:text-teal-500 transition text-sm font-black flex-shrink-0">แก้</button>
           <button onclick="deleteEntry('${e.id}')" class="text-gray-300 hover:text-red-400 transition text-lg flex-shrink-0">🗑</button>
         </div>`;
       });
@@ -404,18 +304,14 @@
     if (!html) html = `<div class="text-center text-gray-300 py-12">
       <p class="text-5xl mb-3">🍽️</p>
       <p class="font-bold text-gray-400">ยังไม่มีรายการอาหารวันนี้</p>
-      <p class="text-sm text-gray-300 mt-1">ถ่ายรูปหรือบันทึกเองได้เลย</p>
+      <p class="text-sm text-gray-300 mt-1">ถ่ายรูปอาหารเพื่อเริ่มบันทึก</p>
     </div>`;
     document.getElementById('mealSections').innerHTML = html;
   }
 
   window.deleteEntry = async (id) => {
     if (!confirm('ลบรายการนี้?')) return;
-    try {
-      await deleteDoc(doc(db,'foodLogs',id));
-    } catch (err) {
-      alert('ลบไม่สำเร็จ: ' + err.message);
-    }
+    try { await deleteDoc(doc(db, 'foodLogs', id)); } catch (err) { alert('ลบไม่สำเร็จ: ' + err.message); }
   };
 
   window.editEntry = async (id, encodedName, calories, carbs, protein, fat, fiber, sodium, encodedNote) => {
@@ -435,9 +331,8 @@
     if (sodiumInput === null) return;
     const note = prompt('หมายเหตุ', decodeURIComponent(encodedNote));
     if (note === null) return;
-
     try {
-      await updateDoc(doc(db,'foodLogs',id), {
+      await updateDoc(doc(db, 'foodLogs', id), {
         name: name.trim() || 'ไม่ระบุชื่อ',
         calories: Math.max(0, parseInt(calInput) || 0),
         carbs: Math.max(0, parseInt(carbsInput) || 0),
@@ -445,15 +340,12 @@
         fat: Math.max(0, parseInt(fatInput) || 0),
         fiber: Math.max(0, parseInt(fiberInput) || 0),
         sodium: Math.max(0, parseInt(sodiumInput) || 0),
-        note: note.trim(),
-        updatedAt: new Date().toISOString()
+        note: note.trim(), updatedAt: new Date().toISOString()
       });
-    } catch (err) {
-      alert('แก้ไขไม่สำเร็จ: ' + err.message);
-    }
+    } catch (err) { alert('แก้ไขไม่สำเร็จ: ' + err.message); }
   };
 
-  // ── Camera modal ───────────────────────────────────────────
+  // Camera modal
   window.openCamera = () => {
     document.getElementById('cameraModal').classList.remove('hidden');
     document.getElementById('previewImg').classList.add('hidden');
@@ -465,22 +357,13 @@
     selectedFile = null; selectedB64 = null;
   };
   window.closeCameraModal = () => document.getElementById('cameraModal').classList.add('hidden');
-  window.openManual = () => document.getElementById('manualModal').classList.remove('hidden');
 
   window.selectMeal = (btn) => {
     selectedMeal = btn.dataset.meal;
-    document.querySelectorAll('.meal-btn').forEach(b=>{
-      b.className = b===btn
+    document.querySelectorAll('.meal-btn').forEach(b => {
+      b.className = b === btn
         ? 'meal-btn flex-1 py-2 rounded-xl text-xs font-bold border-2 border-teal-400 bg-teal-50 text-teal-600'
         : 'meal-btn flex-1 py-2 rounded-xl text-xs font-bold border-2 border-gray-200 text-gray-500';
-    });
-  };
-  window.selectMealM = (btn) => {
-    selectedMealM = btn.dataset.meal;
-    document.querySelectorAll('.meal-btn-m').forEach(b=>{
-      b.className = b===btn
-        ? 'meal-btn-m flex-1 py-2 rounded-xl text-xs font-bold border-2 border-teal-400 bg-teal-50 text-teal-600'
-        : 'meal-btn-m flex-1 py-2 rounded-xl text-xs font-bold border-2 border-gray-200 text-gray-500';
     });
   };
 
@@ -499,8 +382,7 @@
       document.getElementById('saveBtn').classList.add('hidden');
     }).catch(err => {
       alert('อ่านรูปไม่สำเร็จ: ' + err.message);
-      selectedFile = null;
-      selectedB64 = null;
+      selectedFile = null; selectedB64 = null;
     });
   };
 
@@ -516,8 +398,7 @@
           const canvas = document.createElement('canvas');
           canvas.width = Math.max(1, Math.round(img.width * scale));
           canvas.height = Math.max(1, Math.round(img.height * scale));
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
           resolve(canvas.toDataURL('image/jpeg', quality));
         };
         img.src = reader.result;
@@ -534,94 +415,48 @@
     status.textContent = '🤖 Gemini กำลังวิเคราะห์อาหาร…';
     status.classList.remove('hidden');
     try {
-      const res = await fetch(
-        '/api/analyze-food',
-        { method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({
-            mimeType: 'image/jpeg',
-            image: selectedB64
-          })
-        }
-      );
+      const res = await fetch('/api/analyze-food', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mimeType: 'image/jpeg', image: selectedB64 }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Analyze request failed');
       const parsed = data.food || {};
-      document.getElementById('foodName').value     = parsed.name     || '';
+      document.getElementById('foodName').value = parsed.name || '';
       document.getElementById('foodCalories').value = parsed.calories || '';
-      document.getElementById('foodCarbs').value    = parsed.carbs    || '';
-      document.getElementById('foodProtein').value  = parsed.protein  || '';
-      document.getElementById('foodFat').value      = parsed.fat      || '';
-      document.getElementById('foodFiber').value    = parsed.fiber    || '';
-      document.getElementById('foodSodium').value   = parsed.sodium   || '';
-      document.getElementById('foodNote').textContent = parsed.note   || '';
+      document.getElementById('foodCarbs').value = parsed.carbs || '';
+      document.getElementById('foodProtein').value = parsed.protein || '';
+      document.getElementById('foodFat').value = parsed.fat || '';
+      document.getElementById('foodFiber').value = parsed.fiber || '';
+      document.getElementById('foodSodium').value = parsed.sodium || '';
+      document.getElementById('foodNote').textContent = parsed.note || '';
       document.getElementById('analyzeResult').classList.remove('hidden');
       document.getElementById('saveBtn').classList.remove('hidden');
       status.textContent = '✅ วิเคราะห์เสร็จแล้ว แก้ไขได้ก่อนบันทึก';
-    } catch(err) {
+    } catch (err) {
       status.textContent = '❌ วิเคราะห์ไม่สำเร็จ: ' + err.message;
       btn.disabled = false;
     }
   };
 
   window.saveFoodEntry = async () => {
-    const name     = document.getElementById('foodName').value.trim();
-    const calories = Math.max(0, parseInt(document.getElementById('foodCalories').value)||0);
-    const carbs    = Math.max(0, parseInt(document.getElementById('foodCarbs').value)||0);
-    const protein  = Math.max(0, parseInt(document.getElementById('foodProtein').value)||0);
-    const fat      = Math.max(0, parseInt(document.getElementById('foodFat').value)||0);
-    const fiber    = Math.max(0, parseInt(document.getElementById('foodFiber').value)||0);
-    const sodium   = Math.max(0, parseInt(document.getElementById('foodSodium').value)||0);
-    const note     = document.getElementById('foodNote').textContent.trim();
+    const name = document.getElementById('foodName').value.trim();
+    const calories = Math.max(0, parseInt(document.getElementById('foodCalories').value) || 0);
+    const carbs = Math.max(0, parseInt(document.getElementById('foodCarbs').value) || 0);
+    const protein = Math.max(0, parseInt(document.getElementById('foodProtein').value) || 0);
+    const fat = Math.max(0, parseInt(document.getElementById('foodFat').value) || 0);
+    const fiber = Math.max(0, parseInt(document.getElementById('foodFiber').value) || 0);
+    const sodium = Math.max(0, parseInt(document.getElementById('foodSodium').value) || 0);
+    const note = document.getElementById('foodNote').textContent.trim();
     if (!name) return alert('กรุณาระบุชื่ออาหาร');
     try {
-      await addDoc(collection(db,'foodLogs'),{
-        uid, name, calories, carbs, protein, fat, fiber, sodium, note, meal: selectedMeal,
-        source: 'ai', analyzedBy: 'gemini',
-        date: today, createdAt: new Date().toISOString()
-      });
+      await addDoc(collection(db, 'foodLogs'), { uid, name, calories, carbs, protein, fat, fiber, sodium, note, meal: selectedMeal, source: 'ai', analyzedBy: 'gemini', date: today, createdAt: new Date().toISOString() });
       closeCameraModal();
-    } catch (err) {
-      alert('บันทึกอาหารไม่สำเร็จ: ' + err.message);
-    }
-  };
-
-  window.saveManualEntry = async () => {
-    const name     = document.getElementById('mFoodName').value.trim();
-    const calories = Math.max(0, parseInt(document.getElementById('mCalories').value)||0);
-    const carbs    = Math.max(0, parseInt(document.getElementById('mCarbs').value)||0);
-    const protein  = Math.max(0, parseInt(document.getElementById('mProtein').value)||0);
-    const fat      = Math.max(0, parseInt(document.getElementById('mFat').value)||0);
-    const fiber    = Math.max(0, parseInt(document.getElementById('mFiber').value)||0);
-    const sodium   = Math.max(0, parseInt(document.getElementById('mSodium').value)||0);
-    if (!name) return alert('กรุณาระบุชื่ออาหาร');
-    try {
-      await addDoc(collection(db,'foodLogs'),{
-        uid, name, calories, carbs, protein, fat, fiber, sodium, meal: selectedMealM,
-        source: 'manual',
-        date: today, createdAt: new Date().toISOString()
-      });
-      document.getElementById('manualModal').classList.add('hidden');
-      document.getElementById('mFoodName').value = '';
-      document.getElementById('mCalories').value = '';
-      document.getElementById('mCarbs').value = '';
-      document.getElementById('mProtein').value  = '';
-      document.getElementById('mFat').value = '';
-      document.getElementById('mFiber').value = '';
-      document.getElementById('mSodium').value = '';
-    } catch (err) {
-      alert('บันทึกอาหารไม่สำเร็จ: ' + err.message);
-    }
+    } catch (err) { alert('บันทึกอาหารไม่สำเร็จ: ' + err.message); }
   };
 
   window.editCalorieGoal = async () => {
     const next = prompt('เป้าหมายแคลอรี่ต่อวัน (kcal)', calorieGoal);
     if (next === null) return;
     const value = Math.max(1, parseInt(next) || 2000);
-    try {
-      await updateDoc(doc(db,'users',uid), { calorieGoal: value });
-    } catch (err) {
-      alert('บันทึกเป้าหมายไม่สำเร็จ: ' + err.message);
-    }
+    try { await updateDoc(doc(db, 'users', uid), { calorieGoal: value }); } catch (err) { alert('บันทึกเป้าหมายไม่สำเร็จ: ' + err.message); }
   };
 
   window.openCalorieHistory = async () => {
@@ -629,33 +464,21 @@
     document.getElementById('historyDatePicker').value = today;
     await loadCalorieHistory();
   };
-
-  window.closeCalorieHistory = () => {
-    document.getElementById('calorieHistoryModal').classList.add('hidden');
-  };
+  window.closeCalorieHistory = () => document.getElementById('calorieHistoryModal').classList.add('hidden');
 
   window.loadCalorieHistory = async () => {
-    const snap = await getDocs(query(collection(db,'foodLogs'), where('uid','==',uid)));
-    historyEntries = snap.docs
-      .map(d=>({id:d.id,...d.data()}))
-      .sort((a,b)=>String(b.date || '').localeCompare(String(a.date || '')) || String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
-
+    const snap = await getDocs(query(collection(db, 'foodLogs'), where('uid', '==', uid)));
+    historyEntries = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
     const byDate = new Map();
     historyEntries.forEach(e => {
       const date = e.date || (e.createdAt ? formatLocalDate(new Date(e.createdAt)) : today);
-      const current = byDate.get(date) || { date, calories: 0, count: 0 };
-      current.calories += Number(e.calories) || 0;
-      current.count += 1;
-      byDate.set(date, current);
+      const cur = byDate.get(date) || { date, calories: 0, count: 0 };
+      cur.calories += Number(e.calories) || 0; cur.count += 1;
+      byDate.set(date, cur);
     });
-
-    const days = [...byDate.values()].sort((a,b)=>b.date.localeCompare(a.date));
+    const days = [...byDate.values()].sort((a, b) => b.date.localeCompare(a.date));
     document.getElementById('calorieHistoryDays').innerHTML = days.length
-      ? days.map(day => `
-        <button onclick="renderHistoryDay('${day.date}')" class="w-full border border-gray-100 rounded-2xl px-3 py-2 text-left flex items-center justify-between">
-          <span class="font-black text-gray-700 text-sm">${day.date}</span>
-          <span class="text-xs font-bold text-teal-600">${day.calories.toLocaleString()} kcal · ${day.count} รายการ</span>
-        </button>`).join('')
+      ? days.map(day => `<button onclick="renderHistoryDay('${day.date}')" class="w-full border border-gray-100 rounded-2xl px-3 py-2 text-left flex items-center justify-between"><span class="font-black text-gray-700 text-sm">${day.date}</span><span class="text-xs font-bold text-teal-600">${day.calories.toLocaleString()} kcal · ${day.count} รายการ</span></button>`).join('')
       : '<p class="text-center text-gray-300 py-6 font-bold text-sm">ยังไม่มีประวัติแคลอรี่</p>';
     renderHistoryDay(document.getElementById('historyDatePicker').value || today);
   };
@@ -663,16 +486,9 @@
   window.renderHistoryDay = (date) => {
     document.getElementById('historyDatePicker').value = date;
     const entries = historyEntries.filter(e => (e.date || (e.createdAt ? formatLocalDate(new Date(e.createdAt)) : '')) === date);
-    const total = entries.reduce((sum,e)=>sum+(Number(e.calories)||0),0);
+    const total = entries.reduce((sum, e) => sum + (Number(e.calories) || 0), 0);
     document.getElementById('calorieHistoryEntries').innerHTML = entries.length
-      ? `<div class="font-black text-gray-700 text-sm mb-2">รวม ${total.toLocaleString()} kcal</div>` + entries.map(e => `
-        <div class="bg-white border border-gray-100 rounded-2xl p-3 flex items-center gap-3 shadow-sm">
-          <div class="flex-1 min-w-0">
-            <p class="font-bold text-gray-800 text-sm truncate">${e.name || 'ไม่ระบุชื่อ'}</p>
-            <p class="text-xs text-gray-400">${e.calories||0} kcal · โปรตีน ${e.protein||0}g · ${e.meal||'-'}</p>
-          </div>
-          <button onclick="editEntry('${e.id}','${encodeURIComponent(e.name||'')}',${e.calories||0},${e.carbs||0},${e.protein||0},${e.fat||0},${e.fiber||0},${e.sodium||0},'${encodeURIComponent(e.note||'')}')" class="text-teal-500 text-xs font-black">แก้</button>
-        </div>`).join('')
+      ? `<div class="font-black text-gray-700 text-sm mb-2">รวม ${total.toLocaleString()} kcal</div>` + entries.map(e => `<div class="bg-white border border-gray-100 rounded-2xl p-3 flex items-center gap-3 shadow-sm"><div class="flex-1 min-w-0"><p class="font-bold text-gray-800 text-sm truncate">${e.name || 'ไม่ระบุชื่อ'}</p><p class="text-xs text-gray-400">${e.calories || 0} kcal · โปรตีน ${e.protein || 0}g · ${e.meal || '-'}</p></div><button onclick="editEntry('${e.id}','${encodeURIComponent(e.name || '')}',${e.calories || 0},${e.carbs || 0},${e.protein || 0},${e.fat || 0},${e.fiber || 0},${e.sodium || 0},'${encodeURIComponent(e.note || '')}')" class="text-teal-500 text-xs font-black">แก้</button></div>`).join('')
       : '<p class="text-center text-gray-300 py-6 font-bold text-sm">วันนี้ยังไม่มีรายการอาหาร</p>';
   };
 
