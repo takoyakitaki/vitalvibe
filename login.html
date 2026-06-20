@@ -2,7 +2,6 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <!-- ✅ เพิ่ม viewport-fit=cover ให้ครบเหมือนทุกหน้า -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>VitalVibe - LINE Login</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -32,14 +31,12 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
 
-  <!-- พื้นหลัง -->
   <div class="absolute inset-0 overflow-hidden pointer-events-none">
     <div class="absolute -top-40 -left-40 w-96 h-96 rounded-full opacity-20" style="background:radial-gradient(circle,#06c755,transparent)"></div>
     <div class="absolute -bottom-40 -right-40 w-96 h-96 rounded-full opacity-20" style="background:radial-gradient(circle,#14b8a6,transparent)"></div>
   </div>
 
   <div class="w-full max-w-sm float-up">
-    <!-- โลโก้ -->
     <div class="text-center mb-8">
       <div id="avatarPreview" class="w-20 h-20 mx-auto rounded-3xl flex items-center justify-center text-4xl mb-3 shadow-2xl overflow-hidden"
            style="background:linear-gradient(135deg,#06c755,#14b8a6)">VV</div>
@@ -48,8 +45,6 @@
     </div>
 
     <div class="card-glass rounded-3xl p-6">
-
-      <!-- สถานะโหลด -->
       <div id="statusView">
         <div class="text-center py-4">
           <div class="w-12 h-12 border-4 border-white/20 border-t-emerald-400 rounded-full spinner mx-auto mb-4"></div>
@@ -58,7 +53,6 @@
         </div>
       </div>
 
-      <!-- ฟอร์มลงทะเบียน -->
       <div id="registerView" class="hidden">
         <div class="mb-5">
           <h2 class="text-white font-black text-xl">ลงทะเบียน</h2>
@@ -81,12 +75,10 @@
         </button>
       </div>
 
-      <!-- ปุ่ม login กรณีเปิดนอก LINE -->
       <button id="btnLineLogin" class="hidden btn-primary w-full py-3.5 rounded-2xl text-white font-black text-sm shadow-lg">
         เข้าสู่ระบบด้วย LINE
       </button>
 
-      <!-- กล่องข้อความ -->
       <div id="msgBox" class="hidden mt-4 p-3 rounded-2xl text-sm text-center font-semibold"></div>
     </div>
 
@@ -94,7 +86,22 @@
   </div>
 
   <script type="module">
-    // ✅ Import แยกจับ error แต่ละตัว
+    // ── ✅ URL ที่ถูกต้องสำหรับ LIFF — ถ้าเปิดผิด URL จะ redirect มาที่นี่ ──
+    const CORRECT_LOGIN_URL = 'https://vitalvibe-gamma.vercel.app/login.html';
+
+    // ── ตรวจเลยว่า URL ปัจจุบันตรงกับที่ LIFF ลงทะเบียนไหม ──
+    const currentUrl = window.location.origin + window.location.pathname;
+    if (currentUrl !== CORRECT_LOGIN_URL && window.location.hostname !== 'localhost') {
+      const params = new URLSearchParams(window.location.search);
+      const redirect = params.get('redirect') || '';
+      const correctUrl = redirect
+        ? `${CORRECT_LOGIN_URL}?redirect=${encodeURIComponent(redirect)}`
+        : CORRECT_LOGIN_URL;
+      console.log(`🔄 URL ไม่ตรงกับ LIFF Endpoint → redirect ไป: ${correctUrl}`);
+      window.location.replace(correctUrl);
+      throw new Error('Redirecting to correct URL');
+    }
+
     let db, LIFF_IDS;
     try {
       const firebaseModule = await import('./lib/firebase.js');
@@ -107,17 +114,14 @@
       throw importErr;
     }
 
-    // ✅ ตรวจสอบ LIFF_IDS ทันที — นี่คือสาเหตุ 400 หลัก
     if (!LIFF_IDS || !LIFF_IDS.login) {
-      console.error('❌ LIFF_IDS.login ไม่มีค่า — ไฟล์ lib/firebase.js อาจไม่ได้ export ตัวแปรนี้');
-      console.error('   ค่า LIFF_IDS ที่ได้:', LIFF_IDS);
+      console.error('❌ LIFF_IDS.login ไม่มีค่า:', LIFF_IDS);
       document.getElementById('statusText').textContent = 'การตั้งค่า LIFF ไม่ถูกต้อง';
-      showMsg(`LIFF_ID ไม่ถูกต้อง (ค่า: ${LIFF_IDS ? JSON.stringify(LIFF_IDS) : 'undefined'}) กรุณาตรวจไฟล์ lib/firebase.js`);
+      showMsg(`LIFF_ID ไม่ถูกต้อง กรุณาตรวจไฟล์ lib/firebase.js`);
       throw new Error('LIFF_IDS.login is missing');
     }
 
-    // ✅ console log ค่าเพื่อ debug ง่าย
-    console.log('✅ LIFF_ID ที่ใช้:', LIFF_IDS.login);
+    console.log('✅ LIFF_ID:', LIFF_IDS.login);
 
     const { saveSession } = await import('./lib/auth.js');
     const {
@@ -160,24 +164,16 @@
       });
     }
 
-    // ✅ ลด query จาก 3 ครั้ง เหลือ 2 ครั้ง (ข้าม query ที่ซ้ำซ้อน)
     async function findUserByLineId(lineUserId) {
-      if (!lineUserId) {
-        console.warn('⚠️ findUserByLineId ถูกเรียกด้วย lineUserId ว่าง');
-        return null;
-      }
+      if (!lineUserId) return null;
 
-      // ค้น 1: ใช้ lineUserId เป็น document ID ตรงๆ
       try {
         const direct = await getDoc(doc(db, 'users', lineUserId));
-        if (direct.exists()) {
-          return { id: direct.id, data: direct.data() };
-        }
+        if (direct.exists()) return { id: direct.id, data: direct.data() };
       } catch (err) {
         console.warn('⚠️ ค้นหา doc ID ล้มเหลว:', err.message);
       }
 
-      // ค้น 2: ค้นใน field 'lineUid'
       try {
         const byLineUid = await getDocs(
           query(collection(db, 'users'), where('lineUid', '==', lineUserId))
@@ -188,13 +184,11 @@
         }
       } catch (err) {
         console.warn('⚠️ ค้นหา field lineUid ล้มเหลว:', err.message);
-        // ถ้า error เป็นเรื่อง index ให้แสดง hint
-        if (err.message?.includes('FAILED_PRECONDITION') || err.code === 'failed-precondition') {
-          console.error('   → อาจต้องสร้าง Composite Index ใน Firestore Console');
+        if (err.code === 'failed-precondition') {
+          console.error('   → ต้องสร้าง Composite Index ใน Firestore');
         }
       }
 
-      // ✅ ลบ query ที่ 3 ออก — lineUserId และ lineUid เก็บค่าเดียวกัน ไม่จำเป็นต้องค้นซ้ำ
       return null;
     }
 
@@ -218,7 +212,6 @@
 
       try {
         const user = await findUserByLineId(profile.userId);
-
         if (!user) {
           console.log('📝 ยังไม่มีบัญชี แสดงฟอร์มลงทะเบียน');
           lineProfile = profile;
@@ -238,7 +231,6 @@
 
     async function startLineLogin() {
       try {
-        // ✅ ตรวจ LIFF SDK โหลดหรือยัง
         if (!window.liff) {
           throw new Error('LINE LIFF SDK ไม่สามารถโหลดได้ กรุณาตรวจสัญญาณอินเทอร์เน็ต');
         }
@@ -249,16 +241,15 @@
         await liff.init({ liffId: LIFF_IDS.login });
         console.log('✅ liff.init สำเร็จ');
 
-        // ✅ ตรวจสอบสถานะ login
         if (!liff.isLoggedIn()) {
           console.log('⚠️ ยังไม่ได้ login ใน LINE');
           if (liff.isInClient()) {
-            // อยู่ใน LINE app → ให้ LIFF จัดการ redirect เอง
+            // ✅ อยู่ใน LINE app และ URL ตรง → ให้ LIFF จัดการ redirect
             console.log('📱 อยู่ใน LINE app → เรียก liff.login()');
             liff.login({ redirectUri: window.location.href });
           } else {
-            // เปิดใน browser ธรรมดา → แสดงปุ่มให้กด
-            console.log('🌐 เปิดใน external browser → แสดงปุ่ม login');
+            // ✅ เปิดใน browser ธรรมดา หรือ URL ไม่ตรง
+            console.log('🌐 ไม่อยู่ใน LINE client → แสดงปุ่ม login');
             document.getElementById('statusView').classList.add('hidden');
             document.getElementById('btnLineLogin').classList.remove('hidden');
             setStatus('กรุณากดปุ่มด้านล่างเพื่อเข้าสู่ระบบ');
@@ -274,11 +265,9 @@
       } catch (err) {
         console.error('❌ startLineLogin ล้มเหลว:', err);
 
-        // ✅ แยกประเภท error เพื่อแสดงข้อความที่เข้าใจง่าย
         let userMsg = 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่';
-
         if (err.message?.includes('400') || err.message?.includes('BAD_REQUEST')) {
-          userMsg = 'LIFF ID ไม่ถูกต้อง กรุณาตรวจสอบการตั้งค่าใน lib/firebase.js';
+          userMsg = 'LIFF ID ไม่ถูกต้อง กรุณาตรวจสอบการตั้งค่า';
         } else if (err.message?.includes('network') || err.message?.includes('Failed to fetch')) {
           userMsg = 'ไม่สามารถเชื่อมต่อได้ กรุณาตรวจสัญญาณอินเทอร์เน็ต';
         } else if (err.message?.includes('LIFF')) {
@@ -291,7 +280,6 @@
       }
     }
 
-    // ✅ ปุ่ม login สำหรับ external browser
     document.getElementById('btnLineLogin').addEventListener('click', async () => {
       const btn = document.getElementById('btnLineLogin');
       btn.disabled = true;
@@ -307,7 +295,6 @@
       }
     });
 
-    // ✅ ปุ่มลงทะเบียน — ปิดการกดซ้ำ
     document.getElementById('btnRegister').addEventListener('click', async () => {
       if (!lineProfile?.userId) {
         return showMsg('ข้อมูล LINE หาย กรุณาลองเข้าสู่ระบบใหม่');
@@ -355,7 +342,6 @@
       }
     });
 
-    // เริ่มต้น
     startLineLogin();
   </script>
 </body>
