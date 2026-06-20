@@ -22,11 +22,17 @@
     }
     .btn-primary:active { transform: scale(0.97); opacity: .9; }
     .btn-primary:disabled { opacity: 0.4; pointer-events: none; }
-    input:focus { outline: none; border-color: #06c755; }
+    input:focus, select:focus { outline: none; border-color: #06c755; }
     @keyframes floatUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
     .float-up { animation: floatUp .5s ease-out forwards; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .spinner { animation: spin .8s linear infinite; }
+    /* ฟอร์มลงทะเบียนยาว → ให้ scroll ภายในการ์ด */
+    .register-scroll { max-height: 70vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .register-scroll::-webkit-scrollbar { display: none; }
+    .register-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    /* ซ่อนลูกศรของ date input บน dark bg */
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
@@ -37,7 +43,7 @@
   </div>
 
   <div class="w-full max-w-sm float-up">
-    <div class="text-center mb-8">
+    <div class="text-center mb-6">
       <div id="avatarPreview" class="w-20 h-20 mx-auto rounded-3xl flex items-center justify-center text-4xl mb-3 shadow-2xl overflow-hidden"
            style="background:linear-gradient(135deg,#06c755,#14b8a6)">VV</div>
       <h1 class="text-3xl font-black text-white tracking-tight">VitalVibe</h1>
@@ -45,6 +51,8 @@
     </div>
 
     <div class="card-glass rounded-3xl p-6">
+
+      <!-- สถานะโหลด -->
       <div id="statusView">
         <div class="text-center py-4">
           <div class="w-12 h-12 border-4 border-white/20 border-t-emerald-400 rounded-full spinner mx-auto mb-4"></div>
@@ -53,24 +61,65 @@
         </div>
       </div>
 
+      <!-- ✅ ฟอร์มลงทะเบียน — เพิ่มฟิลด์ใหม่ -->
       <div id="registerView" class="hidden">
-        <div class="mb-5">
-          <h2 class="text-white font-black text-xl">ลงทะเบียน</h2>
-          <p class="text-white/45 text-xs mt-1">บัญชี LINE นี้ยังไม่ได้ลงทะเบียน</p>
+        <div class="mb-4">
+          <h2 class="text-white font-black text-xl">📝 ลงทะเบียน</h2>
+          <p class="text-white/45 text-xs mt-1">กรอกข้อมูลเพื่อเริ่มใช้งาน VitalVibe</p>
         </div>
-        <div class="space-y-3">
+        <div class="register-scroll space-y-3 pr-1">
+          <!-- ชื่อ-นามสกุล -->
           <div>
-            <label class="text-xs text-white/45 font-bold">ชื่อที่แสดง</label>
-            <input id="regName" type="text" placeholder="ชื่อของคุณ"
+            <label class="text-xs text-white/45 font-bold">ชื่อ - นามสกุล <span class="text-emerald-400">*</span></label>
+            <input id="regName" type="text" placeholder="เช่น สมชาย ใจดี"
               class="mt-1 w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-white placeholder-white/40 text-sm transition-colors">
           </div>
+
+          <!-- เบอร์โทรศัพท์ -->
+          <div>
+            <label class="text-xs text-white/45 font-bold">เบอร์โทรศัพท์ <span class="text-emerald-400">*</span></label>
+            <input id="regPhone" type="tel" placeholder="0812345678" maxlength="10"
+              class="mt-1 w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-white placeholder-white/40 text-sm transition-colors">
+          </div>
+
+          <!-- วันเดือนปีเกิด -->
+          <div>
+            <label class="text-xs text-white/45 font-bold">วันเดือนปีเกิด <span class="text-emerald-400">*</span></label>
+            <input id="regBirthDate" type="date"
+              class="mt-1 w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-white placeholder-white/40 text-sm transition-colors">
+            <p id="birthDateHint" class="text-[10px] text-white/30 mt-1">เลือกวันเกิด (จะแสดงเป็น พ.ศ. อัตโนมัติ)</p>
+          </div>
+
+          <!-- น้ำหนัก & ส่วนสูง -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-white/45 font-bold">น้ำหนัก (kg) <span class="text-emerald-400">*</span></label>
+              <input id="regWeight" type="number" placeholder="65" step="0.1" min="20" max="300"
+                class="mt-1 w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-white placeholder-white/40 text-sm transition-colors">
+            </div>
+            <div>
+              <label class="text-xs text-white/45 font-bold">ส่วนสูง (cm) <span class="text-emerald-400">*</span></label>
+              <input id="regHeight" type="number" placeholder="170" step="0.1" min="50" max="250"
+                class="mt-1 w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-white placeholder-white/40 text-sm transition-colors">
+            </div>
+          </div>
+
+          <!-- อีเมล (optional) -->
           <div>
             <label class="text-xs text-white/45 font-bold">อีเมล (ไม่จำเป็น)</label>
             <input id="regEmail" type="email" placeholder="name@example.com"
               class="mt-1 w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-white placeholder-white/40 text-sm transition-colors">
           </div>
         </div>
-        <button id="btnRegister" class="btn-primary w-full mt-5 py-3.5 rounded-2xl text-white font-black text-sm shadow-lg">
+
+        <!-- ✅ แสดง BMI แบบ real-time -->
+        <div id="bmiPreview" class="hidden mt-3 p-3 rounded-2xl bg-white/10 text-center">
+          <p class="text-white/60 text-xs">BMI ของคุณ</p>
+          <p id="bmiValue" class="text-2xl font-black text-emerald-400 mt-1">–</p>
+          <p id="bmiLabel" class="text-xs text-white/50 mt-0.5">–</p>
+        </div>
+
+        <button id="btnRegister" class="btn-primary w-full mt-4 py-3.5 rounded-2xl text-white font-black text-sm shadow-lg">
           สร้างบัญชี
         </button>
       </div>
@@ -86,10 +135,8 @@
   </div>
 
   <script type="module">
-    // ── ✅ URL ที่ถูกต้องสำหรับ LIFF — ถ้าเปิดผิด URL จะ redirect มาที่นี่ ──
+    // ── URL ตรวจสอบ (เหมือนเวอร์ชันก่อนหน้า) ──
     const CORRECT_LOGIN_URL = 'https://vitalvibe-gamma.vercel.app/login.html';
-
-    // ── ตรวจเลยว่า URL ปัจจุบันตรงกับที่ LIFF ลงทะเบียนไหม ──
     const currentUrl = window.location.origin + window.location.pathname;
     if (currentUrl !== CORRECT_LOGIN_URL && window.location.hostname !== 'localhost') {
       const params = new URLSearchParams(window.location.search);
@@ -97,42 +144,34 @@
       const correctUrl = redirect
         ? `${CORRECT_LOGIN_URL}?redirect=${encodeURIComponent(redirect)}`
         : CORRECT_LOGIN_URL;
-      console.log(`🔄 URL ไม่ตรงกับ LIFF Endpoint → redirect ไป: ${correctUrl}`);
       window.location.replace(correctUrl);
-      throw new Error('Redirecting to correct URL');
+      throw new Error('Redirecting');
     }
 
     let db, LIFF_IDS;
     try {
-      const firebaseModule = await import('./lib/firebase.js');
-      db = firebaseModule.db;
-      LIFF_IDS = firebaseModule.LIFF_IDS;
-    } catch (importErr) {
-      console.error('❌ โหลด firebase.js ไม่สำเร็จ:', importErr);
+      const m = await import('./lib/firebase.js');
+      db = m.db; LIFF_IDS = m.LIFF_IDS;
+    } catch (e) {
       document.getElementById('statusText').textContent = 'โหลด config ไม่สำเร็จ';
-      showMsg('ไม่สามารถโหลดการตั้งค่าได้ กรุณาลองใหม่');
-      throw importErr;
+      showMsg('ไม่สามารถโหลดการตั้งค่าได้');
+      throw e;
     }
 
-    if (!LIFF_IDS || !LIFF_IDS.login) {
-      console.error('❌ LIFF_IDS.login ไม่มีค่า:', LIFF_IDS);
+    if (!LIFF_IDS?.login) {
       document.getElementById('statusText').textContent = 'การตั้งค่า LIFF ไม่ถูกต้อง';
-      showMsg(`LIFF_ID ไม่ถูกต้อง กรุณาตรวจไฟล์ lib/firebase.js`);
-      throw new Error('LIFF_IDS.login is missing');
+      showMsg('LIFF_ID ไม่ถูกต้อง กรุณาตรวจไฟล์ lib/firebase.js');
+      throw new Error('LIFF_IDS.login missing');
     }
-
-    console.log('✅ LIFF_ID:', LIFF_IDS.login);
 
     const { saveSession } = await import('./lib/auth.js');
-    const {
-      collection, doc, getDoc, getDocs, query, setDoc, where
-    } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js');
+    const { collection, doc, getDoc, getDocs, query, setDoc, where } =
+      await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js');
 
     const params = new URLSearchParams(window.location.search);
     const requestedRedirect = params.get('redirect') || '/pages/food.html';
     const redirect = (requestedRedirect.startsWith('/') && !requestedRedirect.startsWith('//'))
-      ? requestedRedirect
-      : '/pages/food.html';
+      ? requestedRedirect : '/pages/food.html';
 
     let lineProfile = null;
 
@@ -143,52 +182,84 @@
       el.classList.remove('hidden');
     }
 
-    function setStatus(text) {
-      document.getElementById('statusText').textContent = text;
-    }
+    function setStatus(t) { document.getElementById('statusText').textContent = t; }
 
-    function renderProfile(profile) {
-      document.getElementById('subtitle').textContent = profile.displayName || 'LINE user';
-      if (profile.pictureUrl) {
-        document.getElementById('avatarPreview').innerHTML =
-          `<img src="${profile.pictureUrl}" class="w-full h-full object-cover" alt="">`;
+    function renderProfile(p) {
+      document.getElementById('subtitle').textContent = p.displayName || 'LINE user';
+      if (p.pictureUrl) {
+        document.getElementById('avatarPreview').innerHTML = `<img src="${p.pictureUrl}" class="w-full h-full object-cover" alt="">`;
       }
     }
 
+    // ✅ แปลง ค.ศ. → พ.ศ.
+    function toBE(ceStr) {
+      if (!ceStr) return null;
+      const p = ceStr.split('-');
+      return `${parseInt(p[0]) + 543}-${p[1]}-${p[2]}`;
+    }
+
+    // ✅ แสดง hint วันที่เป็น พ.ศ. เมื่อเลือก date
+    document.getElementById('regBirthDate').addEventListener('change', (e) => {
+      const hint = document.getElementById('birthDateHint');
+      if (e.target.value) {
+        hint.textContent = `→ วันเกิด: ${toBE(e.target.value)} (พ.ศ.)`;
+        hint.classList.remove('text-white/30');
+        hint.classList.add('text-emerald-400/70');
+      } else {
+        hint.textContent = 'เลือกวันเกิด (จะแสดงเป็น พ.ศ. อัตโนมัติ)';
+        hint.classList.add('text-white/30');
+        hint.classList.remove('text-emerald-400/70');
+      }
+    });
+
+    // ✅ คำนวณ BMI real-time ตอนกรอกน้ำหนัก/ส่วนสูง
+    function updateBMIPreview() {
+      const w = parseFloat(document.getElementById('regWeight').value);
+      const h = parseFloat(document.getElementById('regHeight').value);
+      const preview = document.getElementById('bmiPreview');
+      if (w > 0 && h > 0) {
+        const hm = h / 100;
+        const bmi = w / (hm * hm);
+        let label = '';
+        if (bmi < 18.5) label = 'น้ำหนักน้อยกว่าเกณฑ์';
+        else if (bmi < 23) label = 'น้ำหนักปกติ';
+        else if (bmi < 25) label = 'น้ำหนักเกินเกณฑ์';
+        else if (bmi < 30) label = 'อ้วน';
+        else label = 'อ้วนมาก';
+        document.getElementById('bmiValue').textContent = bmi.toFixed(1);
+        document.getElementById('bmiLabel').textContent = label;
+        preview.classList.remove('hidden');
+      } else {
+        preview.classList.add('hidden');
+      }
+    }
+    document.getElementById('regWeight').addEventListener('input', updateBMIPreview);
+    document.getElementById('regHeight').addEventListener('input', updateBMIPreview);
+
+    // ✅ บันทึก session พร้อมข้อมูลใหม่
     function saveLineSession(userId, userData, profile) {
       saveSession({
         uid: userId,
         displayName: userData.displayName || profile.displayName || 'LINE User',
         avatar: userData.avatar || profile.pictureUrl || '',
         lineUid: profile.userId,
+        phone: userData.phone || '',
+        birthDate: userData.birthDate || '',
+        initialWeight: userData.initialWeight || null,
+        initialHeight: userData.initialHeight || null,
       });
     }
 
     async function findUserByLineId(lineUserId) {
       if (!lineUserId) return null;
-
       try {
-        const direct = await getDoc(doc(db, 'users', lineUserId));
-        if (direct.exists()) return { id: direct.id, data: direct.data() };
-      } catch (err) {
-        console.warn('⚠️ ค้นหา doc ID ล้มเหลว:', err.message);
-      }
-
+        const d = await getDoc(doc(db, 'users', lineUserId));
+        if (d.exists()) return { id: d.id, data: d.data() };
+      } catch (e) { console.warn('⚠️ doc ID lookup failed:', e.message); }
       try {
-        const byLineUid = await getDocs(
-          query(collection(db, 'users'), where('lineUid', '==', lineUserId))
-        );
-        if (!byLineUid.empty) {
-          const found = byLineUid.docs[0];
-          return { id: found.id, data: found.data() };
-        }
-      } catch (err) {
-        console.warn('⚠️ ค้นหา field lineUid ล้มเหลว:', err.message);
-        if (err.code === 'failed-precondition') {
-          console.error('   → ต้องสร้าง Composite Index ใน Firestore');
-        }
-      }
-
+        const s = await getDocs(query(collection(db, 'users'), where('lineUid', '==', lineUserId)));
+        if (!s.empty) { const f = s.docs[0]; return { id: f.id, data: f.data() }; }
+      } catch (e) { console.warn('⚠️ field lookup failed:', e.message); }
       return null;
     }
 
@@ -196,116 +267,74 @@
       document.getElementById('statusView').classList.add('hidden');
       document.getElementById('registerView').classList.remove('hidden');
       document.getElementById('regName').value = profile.displayName || '';
-      showMsg('กรุณาลงทะเบียนก่อนใช้งาน VitalVibe', true);
+      // ตั้ง max date เป็นวันนี้
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2, '0');
+      const d = String(today.getDate()).padStart(2, '0');
+      document.getElementById('regBirthDate').setAttribute('max', `${y}-${m}-${d}`);
+      showMsg('กรุณากรอกข้อมูลเพื่อลงทะเบียน', true);
     }
 
     async function continueWithLineProfile(profile) {
-      if (!profile?.userId) {
-        showMsg('ไม่ได้รับข้อมูล LINE Profile กรุณาลองใหม่');
-        setStatus('ข้อมูล LINE ไม่ครบ');
-        return;
-      }
-
+      if (!profile?.userId) { showMsg('ไม่ได้รับข้อมูล LINE Profile'); setStatus('ข้อมูล LINE ไม่ครบ'); return; }
       renderProfile(profile);
       setStatus('กำลังตรวจสอบการลงทะเบียน...');
-      console.log('✅ LINE Profile:', profile.userId, profile.displayName);
-
       try {
         const user = await findUserByLineId(profile.userId);
-        if (!user) {
-          console.log('📝 ยังไม่มีบัญชี แสดงฟอร์มลงทะเบียน');
-          lineProfile = profile;
-          showRegister(profile);
-          return;
-        }
-
-        console.log('✅ พบบัญชี:', user.id);
+        if (!user) { lineProfile = profile; showRegister(profile); return; }
         saveLineSession(user.id, user.data, profile);
         window.location.href = redirect;
-      } catch (err) {
-        console.error('❌ ตรวจสอบบัญชีล้มเหลว:', err);
-        showMsg('ตรวจสอบข้อมูลไม่สำเร็จ: ' + (err.message || err));
-        setStatus('เกิดข้อผิดพลาด');
-      }
+      } catch (err) { showMsg('ตรวจสอบข้อมูลไม่สำเร็จ: ' + err.message); setStatus('เกิดข้อผิดพลาด'); }
     }
 
     async function startLineLogin() {
       try {
-        if (!window.liff) {
-          throw new Error('LINE LIFF SDK ไม่สามารถโหลดได้ กรุณาตรวจสัญญาณอินเทอร์เน็ต');
-        }
-
+        if (!window.liff) throw new Error('LINE LIFF SDK ไม่สามารถโหลดได้');
         setStatus('กำลังเชื่อมต่อ LINE...');
-        console.log('🔄 เริ่ม liff.init ด้วย ID:', LIFF_IDS.login);
-
         await liff.init({ liffId: LIFF_IDS.login });
-        console.log('✅ liff.init สำเร็จ');
-
         if (!liff.isLoggedIn()) {
-          console.log('⚠️ ยังไม่ได้ login ใน LINE');
-          if (liff.isInClient()) {
-            // ✅ อยู่ใน LINE app และ URL ตรง → ให้ LIFF จัดการ redirect
-            console.log('📱 อยู่ใน LINE app → เรียก liff.login()');
-            liff.login({ redirectUri: window.location.href });
-          } else {
-            // ✅ เปิดใน browser ธรรมดา หรือ URL ไม่ตรง
-            console.log('🌐 ไม่อยู่ใน LINE client → แสดงปุ่ม login');
-            document.getElementById('statusView').classList.add('hidden');
-            document.getElementById('btnLineLogin').classList.remove('hidden');
-            setStatus('กรุณากดปุ่มด้านล่างเพื่อเข้าสู่ระบบ');
-          }
+          if (liff.isInClient()) { liff.login({ redirectUri: window.location.href }); }
+          else { document.getElementById('statusView').classList.add('hidden'); document.getElementById('btnLineLogin').classList.remove('hidden'); setStatus('กรุณากดปุ่มด้านล่าง'); }
           return;
         }
-
-        console.log('✅ ล็อกอินแล้ว ดึง profile...');
         const profile = await liff.getProfile();
-        console.log('✅ ได้ profile:', profile.userId, profile.displayName);
         await continueWithLineProfile(profile);
-
       } catch (err) {
-        console.error('❌ startLineLogin ล้มเหลว:', err);
-
-        let userMsg = 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่';
-        if (err.message?.includes('400') || err.message?.includes('BAD_REQUEST')) {
-          userMsg = 'LIFF ID ไม่ถูกต้อง กรุณาตรวจสอบการตั้งค่า';
-        } else if (err.message?.includes('network') || err.message?.includes('Failed to fetch')) {
-          userMsg = 'ไม่สามารถเชื่อมต่อได้ กรุณาตรวจสัญญาณอินเทอร์เน็ต';
-        } else if (err.message?.includes('LIFF')) {
-          userMsg = err.message;
-        }
-
         document.getElementById('btnLineLogin').classList.remove('hidden');
         setStatus('ไม่สามารถเชื่อมต่อ LINE ได้');
-        showMsg(userMsg);
+        showMsg(err.message || 'เข้าสู่ระบบไม่สำเร็จ');
       }
     }
 
     document.getElementById('btnLineLogin').addEventListener('click', async () => {
       const btn = document.getElementById('btnLineLogin');
-      btn.disabled = true;
-      btn.textContent = 'กำลังเชื่อมต่อ...';
-      try {
-        await liff.init({ liffId: LIFF_IDS.login });
-        liff.login({ redirectUri: window.location.href });
-      } catch (err) {
-        console.error('❌ btnLineLogin ล้มเหลว:', err);
-        showMsg(err.message || 'ไม่สามารถเชื่อมต่อ LINE ได้');
-        btn.disabled = false;
-        btn.textContent = 'เข้าสู่ระบบด้วย LINE';
-      }
+      btn.disabled = true; btn.textContent = 'กำลังเชื่อมต่อ...';
+      try { await liff.init({ liffId: LIFF_IDS.login }); liff.login({ redirectUri: window.location.href }); }
+      catch (err) { showMsg(err.message); btn.disabled = false; btn.textContent = 'เข้าสู่ระบบด้วย LINE'; }
     });
 
+    // ✅ ปุ่มสร้างบัญชี — validate ฟิลด์ใหม่ + บันทึก
     document.getElementById('btnRegister').addEventListener('click', async () => {
-      if (!lineProfile?.userId) {
-        return showMsg('ข้อมูล LINE หาย กรุณาลองเข้าสู่ระบบใหม่');
-      }
-
-      const btn = document.getElementById('btnRegister');
-      btn.disabled = true;
-      btn.textContent = 'กำลังสร้างบัญชี...';
+      if (!lineProfile?.userId) return showMsg('ข้อมูล LINE หาย กรุณาลองใหม่');
 
       const displayName = document.getElementById('regName').value.trim() || lineProfile.displayName || 'LINE User';
+      const phone = document.getElementById('regPhone').value.trim();
+      const birthDate = document.getElementById('regBirthDate').value; // เก็บเป็น ค.ศ.
+      const initialWeight = parseFloat(document.getElementById('regWeight').value) || null;
+      const initialHeight = parseFloat(document.getElementById('regHeight').value) || null;
       const email = document.getElementById('regEmail').value.trim();
+
+      // ✅ validate ฟิลด์ที่จำเป็น
+      if (!displayName) return showMsg('กรุณาระบุชื่อ-นามสกุล');
+      if (!/^0[0-9]{9}$/.test(phone)) return showMsg('เบอร์โทรไม่ถูกต้อง (ต้องเป็น 0 ตามด้วยตัวเลข 9 ตัว)');
+      if (!birthDate) return showMsg('กรุณาเลือกวันเดือนปีเกิด');
+      if (!initialWeight || initialWeight < 20) return showMsg('กรุณาระบุน้ำหนักที่ถูกต้อง');
+      if (!initialHeight || initialHeight < 50) return showMsg('กรุณาระบุส่วนสูงที่ถูกต้อง');
+
+      const btn = document.getElementById('btnRegister');
+      btn.disabled = true; btn.textContent = 'กำลังสร้างบัญชี...';
+
       const userId = lineProfile.userId;
       const userRef = doc(db, 'users', userId);
       const now = new Date().toISOString();
@@ -315,30 +344,24 @@
           uid: userId,
           lineUid: userId,
           displayName,
+          phone,
+          birthDate,            // เก็บเป็น ค.ศ. YYYY-MM-DD
+          initialWeight,
+          initialHeight,
           email: email || '',
           avatar: lineProfile.pictureUrl || '',
           points: 0,
           wallet: 0,
           calorieGoal: 2000,
-          bodyStatsAccess: {
-            height: true,
-            weight: true,
-            waist_hip: false,
-            bloodtest: false,
-            updatedAt: now,
-          },
           createdAt: now,
           updatedAt: now,
         }, { merge: true });
 
-        console.log('✅ สร้างบัญชีสำเร็จ:', userId);
-        saveLineSession(userId, { displayName, email, avatar: lineProfile.pictureUrl || '' }, lineProfile);
+        saveLineSession(userId, { displayName, phone, birthDate, initialWeight, initialHeight, email, avatar: lineProfile.pictureUrl || '' }, lineProfile);
         window.location.href = redirect;
       } catch (err) {
-        console.error('❌ สร้างบัญชีล้มเหลว:', err);
-        showMsg('สร้างบัญชีไม่สำเร็จ: ' + (err.message || err));
-        btn.disabled = false;
-        btn.textContent = 'สร้างบัญชี';
+        showMsg('สร้างบัญชีไม่สำเร็จ: ' + err.message);
+        btn.disabled = false; btn.textContent = 'สร้างบัญชี';
       }
     });
 
