@@ -7,12 +7,19 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
+  <style>
     * { font-family:'Prompt',sans-serif; -webkit-tap-highlight-color:transparent; }
     body { background:#f0f9ff; }
     .pb-safe { padding-bottom:env(safe-area-inset-bottom,20px); }
     .hide-scrollbar::-webkit-scrollbar{display:none} .hide-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
     @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
     .fade-in{animation:fadeIn .35s ease-out forwards}
+    html, body { height: 100%; width: 100%; }
+    body { margin: 0; padding: 0; }
+    @supports (padding: max(0px)) {
+      body { padding: 0; }
+    }
+  </style>
     input:focus{outline:none;border-color:#38bdf8}
   </style>
 </head>
@@ -36,7 +43,7 @@
   </div>
 
   <!-- Scroll area -->
-  <div class="flex-1 overflow-y-auto hide-scrollbar pb-28 px-5 pt-5" id="scrollArea">
+  <div class="flex-1 overflow-y-auto hide-scrollbar px-5 pt-5" id="scrollArea" style="padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px) + 7.5rem)">
 
     <!-- Latest value card -->
     <div id="latestCard" class="bg-gradient-to-r from-sky-500 to-blue-600 rounded-3xl p-5 text-white mb-5 shadow-lg">
@@ -72,16 +79,16 @@
   </div>
 
   <!-- Bottom Nav -->
-  <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur border-t border-gray-100 flex items-center justify-around pb-safe z-50 shadow-2xl">
-    <a href="food.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400">
+  <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur border-t border-gray-100 flex items-center justify-around pb-safe z-50 shadow-2xl min-h-20">
+    <a href="food.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400 flex-1 justify-center">
       <span class="text-xl">🍱</span><span class="text-[10px] font-bold">อาหาร</span></a>
-    <a href="health.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-sky-500">
+    <a href="health.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-sky-500 flex-1 justify-center">
       <span class="text-xl">📋</span><span class="text-[10px] font-bold">สุขภาพ</span></a>
-    <a href="reminders.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400">
+    <a href="reminders.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400 flex-1 justify-center">
       <span class="text-xl">⏰</span><span class="text-[10px] font-bold">เตือน</span></a>
-    <a href="missions.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400">
+    <a href="missions.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400 flex-1 justify-center">
       <span class="text-xl">🏆</span><span class="text-[10px] font-bold">ภารกิจ</span></a>
-    <a href="profile.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400">
+    <a href="profile.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400 flex-1 justify-center">
       <span class="text-xl">👤</span><span class="text-[10px] font-bold">โปรไฟล์</span></a>
   </nav>
 

@@ -15,6 +15,11 @@
     .fade-in{animation:fadeIn .35s ease-out forwards}
     input:focus, textarea:focus{outline:none;border-color:#14b8a6}
     .type-active{background:linear-gradient(135deg,#14b8a6,#10b981);color:#fff;border-color:transparent}
+    html, body { height: 100%; width: 100%; }
+    body { margin: 0; padding: 0; }
+    @supports (padding: max(0px)) {
+      body { padding: 0; }
+    }
   </style>
 </head>
 <body class="h-screen w-screen overflow-hidden">
@@ -26,7 +31,7 @@
     <p class="text-xs text-gray-400 font-semibold mt-1">ยาและหมอนัดของคุณ</p>
   </div>
 
-  <div class="flex-1 overflow-y-auto hide-scrollbar pb-32 px-5 pt-5">
+  <div class="flex-1 overflow-y-auto hide-scrollbar px-5 pt-5" style="padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px) + 7.5rem)">
     <div class="bg-gradient-to-r from-teal-500 to-emerald-500 rounded-3xl p-4 text-white mb-5 shadow-lg">
       <p class="text-xs font-bold opacity-75 uppercase tracking-wider">รายการถัดไป</p>
       <p id="nextReminderTitle" class="text-2xl font-black mt-1 truncate">ยังไม่มีแจ้งเตือน</p>
@@ -87,16 +92,17 @@
     <div id="reminderList" class="space-y-2"></div>
   </div>
 
-  <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur border-t border-gray-100 flex items-center justify-around pb-safe z-50 shadow-2xl">
-    <a href="food.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400">
+  <!-- Bottom Nav -->
+  <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur border-t border-gray-100 flex items-center justify-around pb-safe z-50 shadow-2xl min-h-20">
+    <a href="food.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400 flex-1 justify-center">
       <span class="text-xl">🍱</span><span class="text-[10px] font-bold">อาหาร</span></a>
-    <a href="health.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400">
+    <a href="health.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400 flex-1 justify-center">
       <span class="text-xl">📋</span><span class="text-[10px] font-bold">สุขภาพ</span></a>
-    <a href="reminders.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-teal-500">
+    <a href="reminders.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-teal-500 flex-1 justify-center">
       <span class="text-xl">⏰</span><span class="text-[10px] font-bold">เตือน</span></a>
-    <a href="missions.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400">
+    <a href="missions.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400 flex-1 justify-center">
       <span class="text-xl">🏆</span><span class="text-[10px] font-bold">ภารกิจ</span></a>
-    <a href="profile.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400">
+    <a href="profile.html" class="flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400 flex-1 justify-center">
       <span class="text-xl">👤</span><span class="text-[10px] font-bold">โปรไฟล์</span></a>
   </nav>
 </div>

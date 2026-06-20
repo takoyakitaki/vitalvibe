@@ -15,6 +15,11 @@
     .fade-in{animation:fadeIn .4s ease-out forwards}
     @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
     .analyzing{animation:pulse 1s ease-in-out infinite}
+    html, body { height: 100%; width: 100%; }
+    body { margin: 0; padding: 0; }
+    @supports (padding: max(0px)) {
+      body { padding: 0; }
+    }
   </style>
 </head>
 <body class="h-screen w-screen overflow-hidden">
@@ -54,7 +59,7 @@
   </div>
 
   <!-- Scroll area -->
-  <div class="flex-1 overflow-y-auto hide-scrollbar pb-28 px-5 pt-4" id="scrollArea">
+  <div class="flex-1 overflow-y-auto hide-scrollbar px-5 pt-4" id="scrollArea" style="padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px) + 7.5rem)">
 
     <!-- Add Food buttons -->
     <div class="grid grid-cols-2 gap-3 mb-5">
@@ -78,16 +83,16 @@
   </div><!-- /scroll -->
 
   <!-- Bottom Nav -->
-  <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur border-t border-gray-100 flex items-center justify-around pb-safe z-50 shadow-2xl">
-    <a href="food.html" class="nav-item active flex flex-col items-center py-2 px-2 gap-0.5">
+  <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur border-t border-gray-100 flex items-center justify-around pb-safe z-50 shadow-2xl min-h-20">
+    <a href="food.html" class="nav-item active flex flex-col items-center py-2 px-2 gap-0.5 flex-1 justify-center">
       <span class="text-xl">🍱</span><span class="text-[10px] font-bold">อาหาร</span></a>
-    <a href="health.html" class="nav-item flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400">
+    <a href="health.html" class="nav-item flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400 flex-1 justify-center">
       <span class="text-xl">📋</span><span class="text-[10px] font-bold">สุขภาพ</span></a>
-    <a href="reminders.html" class="nav-item flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400">
+    <a href="reminders.html" class="nav-item flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400 flex-1 justify-center">
       <span class="text-xl">⏰</span><span class="text-[10px] font-bold">เตือน</span></a>
-    <a href="missions.html" class="nav-item flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400">
+    <a href="missions.html" class="nav-item flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400 flex-1 justify-center">
       <span class="text-xl">🏆</span><span class="text-[10px] font-bold">ภารกิจ</span></a>
-    <a href="profile.html" class="nav-item flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400">
+    <a href="profile.html" class="nav-item flex flex-col items-center py-2 px-2 gap-0.5 text-gray-400 flex-1 justify-center">
       <span class="text-xl">👤</span><span class="text-[10px] font-bold">โปรไฟล์</span></a>
   </nav>
   <style>.nav-item.active{color:#14b8a6}</style>
