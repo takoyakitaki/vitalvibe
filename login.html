@@ -2,14 +2,16 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- ✅ เพิ่ม viewport-fit=cover ให้ครบเหมือนทุกหน้า -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>VitalVibe - LINE Login</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    * { font-family: 'Prompt', sans-serif; }
+    * { font-family: 'Prompt', sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background: #0d1117; }
+    html, body { height: 100%; height: 100dvh; }
     .card-glass {
       background: rgba(255,255,255,0.05);
       backdrop-filter: blur(20px);
@@ -20,19 +22,24 @@
       transition: all .2s;
     }
     .btn-primary:active { transform: scale(0.97); opacity: .9; }
+    .btn-primary:disabled { opacity: 0.4; pointer-events: none; }
     input:focus { outline: none; border-color: #06c755; }
-    @keyframes floatUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes floatUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
     .float-up { animation: floatUp .5s ease-out forwards; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { animation: spin .8s linear infinite; }
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
 
+  <!-- พื้นหลัง -->
   <div class="absolute inset-0 overflow-hidden pointer-events-none">
     <div class="absolute -top-40 -left-40 w-96 h-96 rounded-full opacity-20" style="background:radial-gradient(circle,#06c755,transparent)"></div>
     <div class="absolute -bottom-40 -right-40 w-96 h-96 rounded-full opacity-20" style="background:radial-gradient(circle,#14b8a6,transparent)"></div>
   </div>
 
   <div class="w-full max-w-sm float-up">
+    <!-- โลโก้ -->
     <div class="text-center mb-8">
       <div id="avatarPreview" class="w-20 h-20 mx-auto rounded-3xl flex items-center justify-center text-4xl mb-3 shadow-2xl overflow-hidden"
            style="background:linear-gradient(135deg,#06c755,#14b8a6)">VV</div>
@@ -41,40 +48,45 @@
     </div>
 
     <div class="card-glass rounded-3xl p-6">
+
+      <!-- สถานะโหลด -->
       <div id="statusView">
         <div class="text-center py-4">
-          <div class="w-12 h-12 border-4 border-white/20 border-t-emerald-400 rounded-full animate-spin mx-auto mb-4"></div>
-          <p id="statusText" class="text-white font-bold text-sm">Checking LINE account...</p>
-          <p class="text-white/40 text-xs mt-2">Please open this page inside the LINE app.</p>
+          <div class="w-12 h-12 border-4 border-white/20 border-t-emerald-400 rounded-full spinner mx-auto mb-4"></div>
+          <p id="statusText" class="text-white font-bold text-sm">กำลังเชื่อมต่อ LINE...</p>
+          <p class="text-white/40 text-xs mt-2">กรุณาเปิดหน้านี้ภายในแอป LINE</p>
         </div>
       </div>
 
+      <!-- ฟอร์มลงทะเบียน -->
       <div id="registerView" class="hidden">
         <div class="mb-5">
-          <h2 class="text-white font-black text-xl">Register</h2>
-          <p class="text-white/45 text-xs mt-1">This LINE account is not registered yet.</p>
+          <h2 class="text-white font-black text-xl">ลงทะเบียน</h2>
+          <p class="text-white/45 text-xs mt-1">บัญชี LINE นี้ยังไม่ได้ลงทะเบียน</p>
         </div>
         <div class="space-y-3">
           <div>
-            <label class="text-xs text-white/45 font-bold">Display name</label>
-            <input id="regName" type="text"
+            <label class="text-xs text-white/45 font-bold">ชื่อที่แสดง</label>
+            <input id="regName" type="text" placeholder="ชื่อของคุณ"
               class="mt-1 w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-white placeholder-white/40 text-sm transition-colors">
           </div>
           <div>
-            <label class="text-xs text-white/45 font-bold">Email (optional)</label>
+            <label class="text-xs text-white/45 font-bold">อีเมล (ไม่จำเป็น)</label>
             <input id="regEmail" type="email" placeholder="name@example.com"
               class="mt-1 w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-white placeholder-white/40 text-sm transition-colors">
           </div>
         </div>
         <button id="btnRegister" class="btn-primary w-full mt-5 py-3.5 rounded-2xl text-white font-black text-sm shadow-lg">
-          Create account
+          สร้างบัญชี
         </button>
       </div>
 
+      <!-- ปุ่ม login กรณีเปิดนอก LINE -->
       <button id="btnLineLogin" class="hidden btn-primary w-full py-3.5 rounded-2xl text-white font-black text-sm shadow-lg">
-        Login with LINE
+        เข้าสู่ระบบด้วย LINE
       </button>
 
+      <!-- กล่องข้อความ -->
       <div id="msgBox" class="hidden mt-4 p-3 rounded-2xl text-sm text-center font-semibold"></div>
     </div>
 
@@ -82,15 +94,39 @@
   </div>
 
   <script type="module">
-    import { db, LIFF_IDS } from './lib/firebase.js';
-    import { saveSession } from './lib/auth.js';
-    import {
+    // ✅ Import แยกจับ error แต่ละตัว
+    let db, LIFF_IDS;
+    try {
+      const firebaseModule = await import('./lib/firebase.js');
+      db = firebaseModule.db;
+      LIFF_IDS = firebaseModule.LIFF_IDS;
+    } catch (importErr) {
+      console.error('❌ โหลด firebase.js ไม่สำเร็จ:', importErr);
+      document.getElementById('statusText').textContent = 'โหลด config ไม่สำเร็จ';
+      showMsg('ไม่สามารถโหลดการตั้งค่าได้ กรุณาลองใหม่');
+      throw importErr;
+    }
+
+    // ✅ ตรวจสอบ LIFF_IDS ทันที — นี่คือสาเหตุ 400 หลัก
+    if (!LIFF_IDS || !LIFF_IDS.login) {
+      console.error('❌ LIFF_IDS.login ไม่มีค่า — ไฟล์ lib/firebase.js อาจไม่ได้ export ตัวแปรนี้');
+      console.error('   ค่า LIFF_IDS ที่ได้:', LIFF_IDS);
+      document.getElementById('statusText').textContent = 'การตั้งค่า LIFF ไม่ถูกต้อง';
+      showMsg(`LIFF_ID ไม่ถูกต้อง (ค่า: ${LIFF_IDS ? JSON.stringify(LIFF_IDS) : 'undefined'}) กรุณาตรวจไฟล์ lib/firebase.js`);
+      throw new Error('LIFF_IDS.login is missing');
+    }
+
+    // ✅ console log ค่าเพื่อ debug ง่าย
+    console.log('✅ LIFF_ID ที่ใช้:', LIFF_IDS.login);
+
+    const { saveSession } = await import('./lib/auth.js');
+    const {
       collection, doc, getDoc, getDocs, query, setDoc, where
-    } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+    } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js');
 
     const params = new URLSearchParams(window.location.search);
     const requestedRedirect = params.get('redirect') || '/pages/food.html';
-    const redirect = requestedRedirect.startsWith('/') && !requestedRedirect.startsWith('//')
+    const redirect = (requestedRedirect.startsWith('/') && !requestedRedirect.startsWith('//'))
       ? requestedRedirect
       : '/pages/food.html';
 
@@ -124,24 +160,41 @@
       });
     }
 
+    // ✅ ลด query จาก 3 ครั้ง เหลือ 2 ครั้ง (ข้าม query ที่ซ้ำซ้อน)
     async function findUserByLineId(lineUserId) {
-      const direct = await getDoc(doc(db, 'users', lineUserId));
-      if (direct.exists()) {
-        return { id: direct.id, data: direct.data() };
+      if (!lineUserId) {
+        console.warn('⚠️ findUserByLineId ถูกเรียกด้วย lineUserId ว่าง');
+        return null;
       }
 
-      const byLineUid = await getDocs(query(collection(db, 'users'), where('lineUid', '==', lineUserId)));
-      if (!byLineUid.empty) {
-        const found = byLineUid.docs[0];
-        return { id: found.id, data: found.data() };
+      // ค้น 1: ใช้ lineUserId เป็น document ID ตรงๆ
+      try {
+        const direct = await getDoc(doc(db, 'users', lineUserId));
+        if (direct.exists()) {
+          return { id: direct.id, data: direct.data() };
+        }
+      } catch (err) {
+        console.warn('⚠️ ค้นหา doc ID ล้มเหลว:', err.message);
       }
 
-      const byLineUserId = await getDocs(query(collection(db, 'users'), where('lineUserId', '==', lineUserId)));
-      if (!byLineUserId.empty) {
-        const found = byLineUserId.docs[0];
-        return { id: found.id, data: found.data() };
+      // ค้น 2: ค้นใน field 'lineUid'
+      try {
+        const byLineUid = await getDocs(
+          query(collection(db, 'users'), where('lineUid', '==', lineUserId))
+        );
+        if (!byLineUid.empty) {
+          const found = byLineUid.docs[0];
+          return { id: found.id, data: found.data() };
+        }
+      } catch (err) {
+        console.warn('⚠️ ค้นหา field lineUid ล้มเหลว:', err.message);
+        // ถ้า error เป็นเรื่อง index ให้แสดง hint
+        if (err.message?.includes('FAILED_PRECONDITION') || err.code === 'failed-precondition') {
+          console.error('   → อาจต้องสร้าง Composite Index ใน Firestore Console');
+        }
       }
 
+      // ✅ ลบ query ที่ 3 ออก — lineUserId และ lineUid เก็บค่าเดียวกัน ไม่จำเป็นต้องค้นซ้ำ
       return null;
     }
 
@@ -149,76 +202,133 @@
       document.getElementById('statusView').classList.add('hidden');
       document.getElementById('registerView').classList.remove('hidden');
       document.getElementById('regName').value = profile.displayName || '';
-      showMsg('Please register before using VitalVibe.', true);
+      showMsg('กรุณาลงทะเบียนก่อนใช้งาน VitalVibe', true);
     }
 
     async function continueWithLineProfile(profile) {
-      renderProfile(profile);
-      setStatus('Checking registration...');
-
-      const user = await findUserByLineId(profile.userId);
-      if (!user) {
-        lineProfile = profile;
-        showRegister(profile);
+      if (!profile?.userId) {
+        showMsg('ไม่ได้รับข้อมูล LINE Profile กรุณาลองใหม่');
+        setStatus('ข้อมูล LINE ไม่ครบ');
         return;
       }
 
-      saveLineSession(user.id, user.data, profile);
-      window.location.href = redirect;
+      renderProfile(profile);
+      setStatus('กำลังตรวจสอบการลงทะเบียน...');
+      console.log('✅ LINE Profile:', profile.userId, profile.displayName);
+
+      try {
+        const user = await findUserByLineId(profile.userId);
+
+        if (!user) {
+          console.log('📝 ยังไม่มีบัญชี แสดงฟอร์มลงทะเบียน');
+          lineProfile = profile;
+          showRegister(profile);
+          return;
+        }
+
+        console.log('✅ พบบัญชี:', user.id);
+        saveLineSession(user.id, user.data, profile);
+        window.location.href = redirect;
+      } catch (err) {
+        console.error('❌ ตรวจสอบบัญชีล้มเหลว:', err);
+        showMsg('ตรวจสอบข้อมูลไม่สำเร็จ: ' + (err.message || err));
+        setStatus('เกิดข้อผิดพลาด');
+      }
     }
 
     async function startLineLogin() {
       try {
+        // ✅ ตรวจ LIFF SDK โหลดหรือยัง
         if (!window.liff) {
-          throw new Error('LINE LIFF SDK is not available.');
+          throw new Error('LINE LIFF SDK ไม่สามารถโหลดได้ กรุณาตรวจสัญญาณอินเทอร์เน็ต');
         }
 
-        setStatus('Connecting to LINE...');
-        await liff.init({ liffId: LIFF_IDS.login });
+        setStatus('กำลังเชื่อมต่อ LINE...');
+        console.log('🔄 เริ่ม liff.init ด้วย ID:', LIFF_IDS.login);
 
+        await liff.init({ liffId: LIFF_IDS.login });
+        console.log('✅ liff.init สำเร็จ');
+
+        // ✅ ตรวจสอบสถานะ login
         if (!liff.isLoggedIn()) {
+          console.log('⚠️ ยังไม่ได้ login ใน LINE');
           if (liff.isInClient()) {
+            // อยู่ใน LINE app → ให้ LIFF จัดการ redirect เอง
+            console.log('📱 อยู่ใน LINE app → เรียก liff.login()');
             liff.login({ redirectUri: window.location.href });
           } else {
+            // เปิดใน browser ธรรมดา → แสดงปุ่มให้กด
+            console.log('🌐 เปิดใน external browser → แสดงปุ่ม login');
             document.getElementById('statusView').classList.add('hidden');
             document.getElementById('btnLineLogin').classList.remove('hidden');
+            setStatus('กรุณากดปุ่มด้านล่างเพื่อเข้าสู่ระบบ');
           }
           return;
         }
 
+        console.log('✅ ล็อกอินแล้ว ดึง profile...');
         const profile = await liff.getProfile();
+        console.log('✅ ได้ profile:', profile.userId, profile.displayName);
         await continueWithLineProfile(profile);
+
       } catch (err) {
+        console.error('❌ startLineLogin ล้มเหลว:', err);
+
+        // ✅ แยกประเภท error เพื่อแสดงข้อความที่เข้าใจง่าย
+        let userMsg = 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่';
+
+        if (err.message?.includes('400') || err.message?.includes('BAD_REQUEST')) {
+          userMsg = 'LIFF ID ไม่ถูกต้อง กรุณาตรวจสอบการตั้งค่าใน lib/firebase.js';
+        } else if (err.message?.includes('network') || err.message?.includes('Failed to fetch')) {
+          userMsg = 'ไม่สามารถเชื่อมต่อได้ กรุณาตรวจสัญญาณอินเทอร์เน็ต';
+        } else if (err.message?.includes('LIFF')) {
+          userMsg = err.message;
+        }
+
         document.getElementById('btnLineLogin').classList.remove('hidden');
-        setStatus('Unable to check LINE account.');
-        showMsg(err.message || 'LINE login failed');
+        setStatus('ไม่สามารถเชื่อมต่อ LINE ได้');
+        showMsg(userMsg);
       }
     }
 
+    // ✅ ปุ่ม login สำหรับ external browser
     document.getElementById('btnLineLogin').addEventListener('click', async () => {
+      const btn = document.getElementById('btnLineLogin');
+      btn.disabled = true;
+      btn.textContent = 'กำลังเชื่อมต่อ...';
       try {
         await liff.init({ liffId: LIFF_IDS.login });
         liff.login({ redirectUri: window.location.href });
       } catch (err) {
-        showMsg(err.message || 'LINE login failed');
+        console.error('❌ btnLineLogin ล้มเหลว:', err);
+        showMsg(err.message || 'ไม่สามารถเชื่อมต่อ LINE ได้');
+        btn.disabled = false;
+        btn.textContent = 'เข้าสู่ระบบด้วย LINE';
       }
     });
 
+    // ✅ ปุ่มลงทะเบียน — ปิดการกดซ้ำ
     document.getElementById('btnRegister').addEventListener('click', async () => {
-      if (!lineProfile?.userId) return showMsg('LINE profile is missing. Please login again.');
+      if (!lineProfile?.userId) {
+        return showMsg('ข้อมูล LINE หาย กรุณาลองเข้าสู่ระบบใหม่');
+      }
+
+      const btn = document.getElementById('btnRegister');
+      btn.disabled = true;
+      btn.textContent = 'กำลังสร้างบัญชี...';
 
       const displayName = document.getElementById('regName').value.trim() || lineProfile.displayName || 'LINE User';
       const email = document.getElementById('regEmail').value.trim();
-      const userRef = doc(db, 'users', lineProfile.userId);
+      const userId = lineProfile.userId;
+      const userRef = doc(db, 'users', userId);
       const now = new Date().toISOString();
 
       try {
         await setDoc(userRef, {
-          uid: lineProfile.userId,
-          lineUid: lineProfile.userId,
-          lineUserId: lineProfile.userId,
+          uid: userId,
+          lineUid: userId,
           displayName,
-          email,
+          email: email || '',
           avatar: lineProfile.pictureUrl || '',
           points: 0,
           wallet: 0,
@@ -234,13 +344,18 @@
           updatedAt: now,
         }, { merge: true });
 
-        saveLineSession(lineProfile.userId, { displayName, email, avatar: lineProfile.pictureUrl || '' }, lineProfile);
+        console.log('✅ สร้างบัญชีสำเร็จ:', userId);
+        saveLineSession(userId, { displayName, email, avatar: lineProfile.pictureUrl || '' }, lineProfile);
         window.location.href = redirect;
       } catch (err) {
-        showMsg(err.message || 'Register failed');
+        console.error('❌ สร้างบัญชีล้มเหลว:', err);
+        showMsg('สร้างบัญชีไม่สำเร็จ: ' + (err.message || err));
+        btn.disabled = false;
+        btn.textContent = 'สร้างบัญชี';
       }
     });
 
+    // เริ่มต้น
     startLineLogin();
   </script>
 </body>
